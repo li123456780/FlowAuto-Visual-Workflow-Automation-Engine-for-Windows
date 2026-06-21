@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowAuto v2 测试套件 | FlowAuto Test Suite v2</title>
+<style>
+  :root {
+    --bg: #1a1a1e; --panel-bg: #222228; --border: #333338;
+    --text: #d4d4d4; --text-muted: #888; --accent: #4285f4;
+    --success: #34a853; --warning: #fbbc04; --danger: #ea4335;
+    --ball-unique: #00ff88;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Microsoft YaHei',sans-serif;height:100vh;overflow:hidden;user-select:none;display:flex;flex-direction:column}
+
+  .header{background:var(--panel-bg);border-bottom:2px solid var(--border);padding:8px 16px;display:flex;align-items:center;justify-content:space-between;height:44px;flex-shrink:0}
+  .header h1{font-size:16px;color:var(--accent)}
+  .header .status{font-size:11px;color:var(--text-muted)}
+  .header .status b{color:var(--success)}
+
+  .main{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;gap:6px;padding:6px;flex:1;min-height:0}
+
+  .panel{background:var(--panel-bg);border:1px solid var(--border);border-radius:6px;padding:8px;display:flex;flex-direction:column;overflow:hidden;position:relative}
+  .panel h2{font-size:12px;color:var(--accent);margin-bottom:4px;padding-bottom:4px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;flex-shrink:0}
+  .panel h2 .badge{font-size:9px;background:var(--accent);color:#fff;padding:1px 6px;border-radius:8px}
+  .panel h2 .badge.ok{background:var(--success)}
+  .panel h2 .badge.warn{background:var(--warning);color:#000}
+  .panel-content{flex:1;position:relative;overflow:hidden;min-height:0}
+  .controls{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;flex-shrink:0}
+  button{background:var(--panel-bg);border:1px solid var(--border);color:var(--text);padding:3px 10px;border-radius:3px;cursor:pointer;font-size:10px;font-family:inherit;transition:all 0.15s}
+  button:hover{background:#3a3a40;border-color:var(--accent)}
+  button.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  button.recording{background:var(--danger);border-color:var(--danger);color:#fff;animation:pulse 0.8s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
+  .result-line{font-size:10px;display:flex;align-items:center;gap:4px;flex-shrink:0;margin-top:2px}
+  .result-line .val{font-weight:bold}
+  .result-line .val.good{color:var(--success)}
+  .result-line .val.bad{color:var(--danger)}
+  .result-line .val.mid{color:var(--warning)}
+
+  /* Panel 1: Ball Click */
+  #ballArea{background:#111;border-radius:3px;position:relative;flex:1;cursor:crosshair;min-height:160px}
+  .ball{position:absolute;border-radius:50%;background:radial-gradient(circle at 35% 35%, #5fffea, var(--ball-color));box-shadow:0 0 18px rgba(49,216,183,0.4);pointer-events:none;z-index:10}
+  .click-marker{position:absolute;width:10px;height:10px;border-radius:50%;border:2px solid #fff;pointer-events:none;z-index:20;animation:markerFade 0.8s forwards}
+  @keyframes markerFade{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(2.5)}}
+
+  /* Panel 2: HSV ColorMotion */
+  #hsvArea{background:#111;border-radius:3px;position:relative;flex:1;min-height:160px;overflow:hidden}
+  .noise-dot{position:absolute;border-radius:50%;pointer-events:none}
+  .noise-rect{position:absolute;pointer-events:none;opacity:0.6}
+  .hsv-ball{position:absolute;border-radius:50%;background:var(--ball-unique);pointer-events:none;z-index:20}
+  .dir-indicator{position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,0.7);color:var(--ball-unique);font-size:20px;padding:2px 8px;border-radius:3px;z-index:25}
+  .cursor-dot{position:absolute;width:10px;height:10px;border-radius:50%;background:#ff3333;border:2px solid #fff;box-shadow:0 0 8px #ff3333;pointer-events:none;z-index:30;transform:translate(-50%,-50%)}
+
+  /* Panel 3: HSV Shape Template Match */
+  #hsvShapeArea{background:#0d1117;border-radius:3px;position:relative;flex:1;min-height:160px;overflow:hidden}
+  .hsv-shape-bg-canvas{position:absolute;top:0;left:0;z-index:1;pointer-events:none}
+  .hsv-shape{position:absolute;z-index:10;background:var(--ball-unique)}
+  .hsv-shape-circle{width:30px;height:30px;border-radius:50%}
+  .hsv-shape-square{width:26px;height:26px}
+  .hsv-shape-triangle{width:32px;height:28px;clip-path:polygon(50% 0%, 100% 100%, 0% 100%)}
+  .hsv-shape-diamond{width:24px;height:24px;clip-path:polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)}
+
+  /* Panel 3: Image WaitCondition */
+  #imageArea{background:#111;border-radius:3px;display:flex;align-items:center;justify-content:center;flex:1;position:relative;min-height:160px}
+  #targetImage{max-width:75%;max-height:75%;transition:opacity 0.2s;border-radius:8px}
+
+  /* Panel 4: ColorCal */
+  #colorCalArea{background:#111;border-radius:3px;position:relative;flex:1;min-height:160px}
+  .cal-target{position:absolute;border-radius:50%;cursor:pointer;transition:left 0.4s,top 0.4s;box-shadow:0 0 10px rgba(255,255,255,0.2);z-index:5}
+  .cal-target .label{position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);font-size:8px;color:var(--text-muted);white-space:nowrap}
+  .cal-expression{font-size:10px;color:var(--text-muted);font-family:Consolas,monospace;background:rgba(0,0,0,0.5);padding:2px 6px;border-radius:3px;position:absolute;top:4px;left:4px;z-index:10}
+
+  /* Panel 5: StateChange */
+  #stateArea{background:#111;border-radius:3px;display:flex;align-items:center;justify-content:center;flex:1;position:relative;min-height:160px}
+  #stateIndicator{font-size:60px;transition:all 0.3s;text-align:center}
+
+  /* Panel 6: Bar HSV */
+  #barArea{background:#111;border-radius:3px;position:relative;flex:1;min-height:160px;overflow:hidden}
+  .bar{position:absolute;height:4px;background:var(--ball-unique);box-shadow:0 0 12px rgba(0,255,136,0.8);pointer-events:none;z-index:20;border-radius:2px;transform:translateY(-50%)}
+
+  /* Panel 7: Results Log */
+  #logPanel{grid-column:1/-1;max-height:130px}
+  #logArea{background:#0a0a0d;border-radius:3px;flex:1;overflow-y:auto;font-family:Consolas,'Courier New',monospace;font-size:10px;padding:4px 8px;color:#7a7a7a;min-height:50px;line-height:1.5}
+  .log-g{color:var(--success)}.log-r{color:var(--danger)}.log-y{color:var(--warning)}.log-b{color:var(--accent)}.log-w{color:#fff}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🧪 FlowAuto v2 测试套件 — 结果验证版</h1>
+  <div class="status">🟢 运行中 | 时间: <b id="elapsed">00:00</b> | 总事件: <b id="totalEvents">0</b></div>
+</div>
+
+<div class="main">
+
+  <!-- Panel 1: Ball Click (ClickElement / TemplateMatch 验证) -->
+  <div class="panel">
+    <h2>🖱️ 小球点击测试 <span class="badge ok">ClickElement</span></h2>
+    <div class="panel-content"><div id="ballArea"><div id="ball" class="ball" style="width:34px;height:34px"></div></div></div>
+    <div class="result-line">📍 位置:<span class="val" id="ballPos">(0,0)</span> | 🎯 点击:<span class="val" id="clickTotal">0</span> | ✅ 命中:<span class="val good" id="clickHit">0</span> | ❌ 脱靶:<span class="val bad" id="clickMiss">0</span> | 📊 命中率:<span class="val" id="clickRate">-</span></div>
+    <div class="controls">
+      <button id="btnBallToggle" class="active">⏯️ 暂停</button>
+      <button id="btnBallSpeed">🎲 变速</button>
+      <button id="btnBallColor">🎨 换色</button>
+      <button id="btnResetClick">🔄 重置统计</button>
+      <span style="font-size:10px;color:var(--text-muted);margin-left:4px">点击小球区域测试</span>
+    </div>
+  </div>
+
+  <!-- Panel 2: HSV ColorMotion -->
+  <div class="panel">
+    <h2>🎯 HSV颜色运动检测 <span class="badge">ColorMotion</span></h2>
+    <div class="panel-content"><div id="hsvArea" style="cursor:crosshair"><div id="hsvBall" class="hsv-ball" style="width:28px;height:28px"></div></div></div>
+    <div class="result-line">📍 位置:<span class="val" id="hsvPos">(0,0)</span> | 🎯 点击:<span class="val" id="hsvClickTotal">0</span> | ✅ 命中:<span class="val good" id="hsvClickHit">0</span> | ❌ 脱靶:<span class="val bad" id="hsvClickMiss">0</span> | 📊 命中率:<span class="val" id="hsvClickRate">-</span></div>
+    <div class="controls">
+      <button id="btnHsvToggle" class="active">⏯️ 暂停</button>
+      <button id="btnHsvNoise">🎲 重绘噪声</button>
+      <button id="btnHsvSpeed">⚡ 变速</button>
+      <button id="btnResetHsv">🔄 重置</button>
+      <span style="font-size:10px;color:var(--text-muted)">点击小球区域测试</span>
+    </div>
+  </div>
+
+  <!-- Panel 3: HSV Template Match (形状匹配) -->
+  <div class="panel">
+    <h2>🔍 HSV模板匹配 <span class="badge">ClickElement</span></h2>
+    <div class="panel-content"><div id="hsvShapeArea" style="cursor:crosshair"></div></div>
+    <div class="result-line">🎯 目标:<span class="val" id="shapeTarget">● 圆</span> | 点击:<span class="val" id="shapeTotal">0</span> | ✅ 命中:<span class="val good" id="shapeHit">0</span> | ❌ 错形:<span class="val bad" id="shapeWrong">0</span> | 💨 脱靶:<span class="val mid" id="shapeMiss">0</span> | 📊 命中率:<span class="val" id="shapeRate">-</span></div>
+    <div class="controls">
+      <button id="btnShapeShuffle">🔀 随机布局</button>
+      <button id="btnShapeTarget">🎯 换目标</button>
+      <button id="btnResetShape">🔄 重置</button>
+      <span style="font-size:10px;color:var(--text-muted)">HSV过滤后Template Match识别形状</span>
+    </div>
+  </div>
+
+  <!-- Panel 4: ColorCal 颜色计算验证 -->
+  <div class="panel">
+    <h2>🧮 颜色计算 <span class="badge">ColorCal</span></h2>
+    <div class="panel-content"><div id="colorCalArea"></div></div>
+    <div class="result-line" style="flex-wrap:wrap">📐 表达式:<span class="val" id="calExpr" style="font-size:9px">-</span> | 🎯 结果:<span class="val good" id="calResult">-</span> | ✅ 正确:<span class="val good" id="calCorrect">0</span> | ❌ 错误:<span class="val bad" id="calWrong">0</span> | 📊 正确率:<span class="val" id="calRate">-</span></div>
+    <div class="controls">
+      <button id="btnCalShuffle">🔀 随机布局</button>
+      <button id="btnCalEval">🔍 手动求值</button>
+      <button id="btnCalAuto" class="active">🔄 自动洗牌</button>
+      <button id="btnResetCal">🔄 重置</button>
+    </div>
+  </div>
+
+  <!-- Panel 5: StateChange 反应时间验证 -->
+  <div class="panel">
+    <h2>🔔 状态变化检测 <span class="badge">StateChange</span></h2>
+    <div class="panel-content"><div id="stateArea" style="cursor:pointer;position:relative"><div id="stateIndicator">🟢</div><div id="stateTimer" style="position:absolute;top:8px;left:8px;font-size:24px;font-weight:bold;color:#fff;text-shadow:0 0 10px rgba(0,0,0,0.8);display:none">0ms</div></div></div>
+    <div class="result-line">📊 状态:<span class="val" id="stateLabel">绿色</span> | ⏱️ 平均反应:<span class="val" id="stateAvgTime">-</span> | 🎯 总次数:<span class="val" id="stateTotal">0</span> | ✅ 正确:<span class="val good" id="stateCorrect">0</span> | ❌ 漏检:<span class="val bad" id="stateMissed">0</span></div>
+    <div class="controls">
+      <button id="btnStateStart">▶️ 开始</button>
+      <button id="btnStateAuto" class="active">🔄 自动</button>
+      <button id="btnResetState">🔄 重置</button>
+    </div>
+  </div>
+
+  <!-- Panel 6: Bar HSV ColorMotion (Horizontal only) -->
+  <div class="panel">
+    <h2>📏 HSV细杆运动检测 <span class="badge">ColorMotion</span></h2>
+    <div class="panel-content"><div id="barArea"><div id="bar" class="bar" style="width:80px;top:50%"></div><div class="dir-indicator" id="barDirLabel">⏺</div></div></div>
+    <div class="result-line">🧭 HTML检测:<span class="val" id="barDir">静止</span> | ⌨️ 按键:<span class="val" id="barKey">-</span> | ✅ 正确:<span class="val good" id="barCorrect">0</span> | ❌ 错误:<span class="val bad" id="barWrong">0</span> | 📊 正确率:<span class="val" id="barRate">-</span></div>
+    <div class="controls">
+      <button id="btnBarToggle" class="active">⏯️ 暂停</button>
+      <button id="btnBarNoise">🎲 重绘噪声</button>
+      <button id="btnBarSpeed">⚡ 变速</button>
+      <button id="btnResetBar">🔄 重置</button>
+      <span style="font-size:10px;color:var(--text-muted)">AD模拟FlowAuto | 窗口150ms | 仅左右</span></span>
+    </div>
+  </div>
+
+  <!-- Panel 7: Results Log -->
+  <div class="panel" id="logPanel">
+    <h2>📋 验证结果日志 <span class="badge ok">Results</span></h2>
+    <div id="logArea"></div>
+    <div class="controls">
+      <button id="btnClearLog">🗑️ 清空</button>
+      <button id="btnExport">📥 导出报告</button>
+      <button id="btnAutoTest">🚀 自动综合测试</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ==================== ENGINE ====================
+const $ = id => document.getElementById(id);
+const logEl = $('logArea');
+
+function log(cls, msg) {
+  const t = new Date().toLocaleTimeString('zh-CN',{hour12:false});
+  logEl.innerHTML += `<span class="log-w">[${t}]</span> <span class="log-${cls}">${msg}</span>\n`;
+  logEl.scrollTop = logEl.scrollHeight;
+  const lines = logEl.innerHTML.split('\n');
+  if(lines.length>300) logEl.innerHTML = lines.slice(-300).join('\n');
+}
+
+let totalEvents = 0;
+function evt(){ totalEvents++; $('totalEvents').textContent = totalEvents; }
+
+// Timer
+const startTime = Date.now();
+setInterval(()=>{
+  const e=Math.floor((Date.now()-startTime)/1000);
+  $('elapsed').textContent = `${String(Math.floor(e/60)).padStart(2,'0')}:${String(e%60).padStart(2,'0')}`;
+},1000);
+
+// ==================== PANEL 1: BALL CLICK ====================
+const ballArea=$('ballArea'), ball=$('ball');
+let bX=100,bY=70,bVX=2.2,bVY=1.6,bR=17,bRunning=true,bColor='#31d8b7';
+let clickTotal=0,clickHit=0,clickMiss=0;
+
+function updateBallStyle(){
+  ball.style.background=`radial-gradient(circle at 35% 35%, #fff, ${bColor})`;
+  ball.style.boxShadow=`0 0 ${bR}px ${bColor}88`;
+}
+function updateClickStats(){
+  $('clickTotal').textContent=clickTotal;
+  $('clickHit').textContent=clickHit;
+  $('clickMiss').textContent=clickMiss;
+  const rate=clickTotal>0?(clickHit/clickTotal*100).toFixed(1)+'%':'-';
+  $('clickRate').textContent=rate;
+  $('clickRate').className='val '+(clickTotal>0?(clickHit/clickTotal>=0.5?'good':'bad'):'');
+}
+
+ballArea.addEventListener('click',e=>{
+  const rect=ballArea.getBoundingClientRect();
+  const cx=e.clientX-rect.left, cy=e.clientY-rect.top;
+  clickTotal++;
+  const dist=Math.sqrt((cx-(bX+bR))**2+(cy-(bY+bR))**2);
+  if(dist<=bR+6){ clickHit++; log('g',`✅ 命中小球! 距离中心:${dist.toFixed(1)}px`); }
+  else{ clickMiss++; log('r',`❌ 脱靶! 距离:${dist.toFixed(0)}px (点击:${Math.round(cx)},${Math.round(cy)} 球心:${Math.round(bX+bR)},${Math.round(bY+bR)})`); }
+  // Visual marker
+  const m=document.createElement('div');m.className='click-marker';
+  m.style.left=(cx-5)+'px';m.style.top=(cy-5)+'px';
+  m.style.borderColor=dist<=bR+6?'#34a853':'#ea4335';
+  ballArea.appendChild(m);setTimeout(()=>m.remove(),800);
+  updateClickStats();evt();
+});
+
+function animBall(){
+  if(!bRunning){requestAnimationFrame(animBall);return;}
+  const aw=ballArea.clientWidth,ah=ballArea.clientHeight;
+  bVX+=(Math.random()-0.5)*0.25;bVY+=(Math.random()-0.5)*0.25;
+  const spd=Math.sqrt(bVX**2+bVY**2);if(spd>7){bVX=bVX/spd*7;bVY=bVY/spd*7;}if(spd<0.4){bVX=(Math.random()-0.5)*3;bVY=(Math.random()-0.5)*3;}
+  bX+=bVX;bY+=bVY;
+  if(bX<=0){bX=0;bVX=Math.abs(bVX)*(0.7+Math.random()*0.5);}
+  if(bX>=aw-bR*2){bX=aw-bR*2;bVX=-Math.abs(bVX)*(0.7+Math.random()*0.5);}
+  if(bY<=0){bY=0;bVY=Math.abs(bVY)*(0.7+Math.random()*0.5);}
+  if(bY>=ah-bR*2){bY=ah-bR*2;bVY=-Math.abs(bVY)*(0.7+Math.random()*0.5);}
+  ball.style.left=bX+'px';ball.style.top=bY+'px';
+  $('ballPos').textContent=`(${Math.round(bX+bR)},${Math.round(bY+bR)})`;
+  requestAnimationFrame(animBall);
+}
+
+$('btnBallToggle').addEventListener('click',function(){bRunning=!bRunning;this.textContent=bRunning?'⏯️ 暂停':'▶️ 恢复';this.classList.toggle('active',bRunning);log('b',bRunning?'小球运动恢复':'小球暂停');evt();});
+$('btnBallSpeed').addEventListener('click',()=>{bVX=(Math.random()-0.5)*8;bVY=(Math.random()-0.5)*8;log('b',`小球速度随机化 VX=${bVX.toFixed(2)} VY=${bVY.toFixed(2)}`);evt();});
+$('btnBallColor').addEventListener('click',()=>{const cs=['#31d8b7','#ff6b6b','#ffd93d','#6bcb77','#4d96ff'];bColor=cs[Math.floor(Math.random()*cs.length)];updateBallStyle();log('b',`小球颜色切换为 ${bColor}`);evt();});
+$('btnResetClick').addEventListener('click',()=>{clickTotal=clickHit=clickMiss=0;updateClickStats();log('b','🔄 点击统计已重置');evt();});
+
+updateBallStyle();requestAnimationFrame(animBall);
+log('b','🖱️ 面板1就绪 — 点击小球测试 ClickElement 精度');
+
+// ==================== PANEL 2: HSV ColorMotion ====================
+const hsvArea=$('hsvArea'),hsvBall=$('hsvBall');
+let hX=120,hY=80,hVX=2.5,hVY=2.0,hR=14,hRunning=true;
+let hsvClickTotal=0,hsvClickHit=0,hsvClickMiss=0;
+const hsvNoiseDots=[],hsvNoiseRects=[];
+
+// ── Position history for windowed displacement (shared with Panel 6) ──
+const HSV_WINDOW_MS = 150;
+
+function recordPosition(historyArr, x, y) {
+  historyArr.push({ x, y, t: performance.now() });
+  while (historyArr.length > 40) historyArr.shift();
+}
+
+function updateHsvClickStats(){
+  $('hsvPos').textContent=`(${Math.round(hX+hR)},${Math.round(hY+hR)})`;
+  $('hsvClickTotal').textContent=hsvClickTotal;
+  $('hsvClickHit').textContent=hsvClickHit;
+  $('hsvClickMiss').textContent=hsvClickMiss;
+  const rate=hsvClickTotal>0?(hsvClickHit/hsvClickTotal*100).toFixed(1)+'%':'-';
+  $('hsvClickRate').textContent=rate;
+  $('hsvClickRate').className='val '+(hsvClickTotal>0?(hsvClickHit/hsvClickTotal>=0.5?'good':'bad'):'');
+}
+
+hsvArea.addEventListener('click',e=>{
+  const rect=hsvArea.getBoundingClientRect();
+  const cx=e.clientX-rect.left, cy=e.clientY-rect.top;
+  hsvClickTotal++;
+  const dist=Math.sqrt((cx-(hX+hR))**2+(cy-(hY+hR))**2);
+  if(dist<=hR+6){ hsvClickHit++; log('g',`✅ HSV命中小球! 距离:${dist.toFixed(1)}px`); }
+  else{ hsvClickMiss++; log('r',`❌ HSV脱靶! 距离:${dist.toFixed(0)}px`); }
+  const m=document.createElement('div');m.className='click-marker';
+  m.style.left=(cx-5)+'px';m.style.top=(cy-5)+'px';
+  m.style.borderColor=dist<=hR+6?'#34a853':'#ea4335';
+  hsvArea.appendChild(m);setTimeout(()=>m.remove(),800);
+  updateHsvClickStats();evt();
+});
+
+function generateNoise(){
+  hsvNoiseDots.forEach(d=>d.remove());hsvNoiseDots.length=0;
+  hsvNoiseRects.forEach(r=>r.remove());hsvNoiseRects.length=0;
+  const aw=hsvArea.clientWidth,ah=hsvArea.clientHeight;
+  const colors=['#30d9b6','#31d8b5','#2fd7b8','#32d9b4','#30d8b6','#2ed8b9','#33d7b5','#ff6a6a','#ff6c6c','#ff6868','#ffd83d','#ffda3f','#6acb76','#6cca78','#4d95ff','#4d97ff','#ff912b','#ff933d','#cc5ce8','#cc5eea','#1fc896','#1ec997','#30e0a0','#2fdf9f'];
+  for(let i=0;i<80;i++){
+    const d=document.createElement('div');d.className='noise-dot';
+    const s=4+Math.random()*16;d.style.width=s+'px';d.style.height=s+'px';
+    d.style.left=(Math.random()*aw)+'px';d.style.top=(Math.random()*ah)+'px';
+    d.style.background=colors[Math.floor(Math.random()*colors.length)];
+    d.style.opacity=0.3+Math.random()*0.5;
+    hsvArea.appendChild(d);hsvNoiseDots.push(d);
+  }
+  for(let i=0;i<20;i++){
+    const r=document.createElement('div');r.className='noise-rect';
+    r.style.width=(20+Math.random()*60)+'px';r.style.height=(10+Math.random()*40)+'px';
+    r.style.left=(Math.random()*aw)+'px';r.style.top=(Math.random()*ah)+'px';
+    r.style.background=colors[Math.floor(Math.random()*colors.length)];
+    r.style.transform=`rotate(${Math.random()*360}deg)`;
+    hsvArea.appendChild(r);hsvNoiseRects.push(r);
+  }
+  log('b',`🎲 噪声背景重绘: ${hsvNoiseDots.length}个点 + ${hsvNoiseRects.length}个矩形`);
+}
+
+function animHsvBall(){
+  if(!hRunning){requestAnimationFrame(animHsvBall);return;}
+  const aw=hsvArea.clientWidth,ah=hsvArea.clientHeight;
+  hVX+=(Math.random()-0.5)*0.3;hVY+=(Math.random()-0.5)*0.3;
+  const spd=Math.sqrt(hVX**2+hVY**2);if(spd>8){hVX=hVX/spd*8;hVY=hVY/spd*8;}if(spd<1.2){hVX=(Math.random()-0.5)*4;hVY=(Math.random()-0.5)*4;}
+  hX+=hVX;hY+=hVY;
+  if(hX<=0){hX=0;hVX=Math.abs(hVX)*(0.7+Math.random()*0.5);}
+  if(hX>=aw-hR*2){hX=aw-hR*2;hVX=-Math.abs(hVX)*(0.7+Math.random()*0.5);}
+  if(hY<=0){hY=0;hVY=Math.abs(hVY)*(0.7+Math.random()*0.5);}
+  if(hY>=ah-hR*2){hY=ah-hR*2;hVY=-Math.abs(hVY)*(0.7+Math.random()*0.5);}
+  hsvBall.style.left=hX+'px';hsvBall.style.top=hY+'px';
+  $('hsvPos').textContent=`(${Math.round(hX+hR)},${Math.round(hY+hR)})`;
+  requestAnimationFrame(animHsvBall);
+}
+
+$('btnHsvToggle').addEventListener('click',function(){hRunning=!hRunning;this.textContent=hRunning?'⏯️ 暂停':'▶️ 恢复';this.classList.toggle('active',hRunning);log('b',hRunning?'HSV小球运动恢复':'HSV小球暂停');evt();});
+$('btnHsvNoise').addEventListener('click',()=>{generateNoise();evt();});
+$('btnHsvSpeed').addEventListener('click',()=>{hVX=(Math.random()-0.5)*10;hVY=(Math.random()-0.5)*10;log('b',`HSV小球速度随机化 VX=${hVX.toFixed(2)} VY=${hVY.toFixed(2)}`);evt();});
+$('btnResetHsv').addEventListener('click',()=>{hsvClickTotal=hsvClickHit=hsvClickMiss=0;updateHsvClickStats();log('b','🔄 HSV点击统计已重置');evt();});
+
+// ==================== PANEL 6: BAR HSV (Horizontal only) ====================
+const barArea=$('barArea'),bar=$('bar');
+let barX=50,barVX=3,barW=80,barRunning=true;
+let barCorrect=0,barWrong=0,barDir='Stationary',barKeyPressed='-';
+const barNoiseDots=[],barNoiseRects=[];
+const barHistory=[];
+
+function generateBarNoise(){
+  barNoiseDots.forEach(d=>d.remove());barNoiseDots.length=0;
+  barNoiseRects.forEach(r=>r.remove());barNoiseRects.length=0;
+  const aw=barArea.clientWidth,ah=barArea.clientHeight;
+  const colors=['#30d9b6','#31d8b5','#2fd7b8','#32d9b4','#30d8b6','#2ed8b9','#33d7b5','#ff6a6a','#ff6c6c','#ff6868','#ffd83d','#ffda3f','#6acb76','#6cca78','#4d95ff','#4d97ff','#ff912b','#ff933d','#cc5ce8','#cc5eea','#1fc896','#1ec997','#30e0a0','#2fdf9f'];
+  for(let i=0;i<80;i++){
+    const d=document.createElement('div');d.className='noise-dot';
+    const s=4+Math.random()*16;d.style.width=s+'px';d.style.height=s+'px';
+    d.style.left=(Math.random()*aw)+'px';d.style.top=(Math.random()*ah)+'px';
+    d.style.background=colors[Math.floor(Math.random()*colors.length)];
+    d.style.opacity=0.3+Math.random()*0.5;
+    barArea.appendChild(d);barNoiseDots.push(d);
+  }
+  for(let i=0;i<20;i++){
+    const r=document.createElement('div');r.className='noise-rect';
+    r.style.width=(20+Math.random()*60)+'px';r.style.height=(10+Math.random()*40)+'px';
+    r.style.left=(Math.random()*aw)+'px';r.style.top=(Math.random()*ah)+'px';
+    r.style.background=colors[Math.floor(Math.random()*colors.length)];
+    r.style.transform=`rotate(${Math.random()*360}deg)`;
+    barArea.appendChild(r);barNoiseRects.push(r);
+  }
+  log('b',`🎲 细杆噪声重绘: ${barNoiseDots.length}个点 + ${barNoiseRects.length}个矩形`);
+}
+
+function getBarWindowedDirection() {
+  const now = performance.now();
+  while (barHistory.length > 0 && now - barHistory[0].t > HSV_WINDOW_MS)
+    barHistory.shift();
+  if (barHistory.length < 2) return 'Stationary';
+  const first = barHistory[0];
+  const last = barHistory[barHistory.length - 1];
+  const dx = last.x - first.x;
+  if (Math.abs(dx) < 3) return 'Stationary';
+  return dx > 0 ? 'Right' : 'Left';
+}
+
+function updateBarStats(){
+  $('barDir').textContent=barDir;
+  $('barKey').textContent=barKeyPressed||'-';
+  $('barCorrect').textContent=barCorrect;
+  $('barWrong').textContent=barWrong;
+  const total=barCorrect+barWrong;
+  $('barRate').textContent=total>0?(barCorrect/total*100).toFixed(1)+'%':'-';
+  $('barRate').className='val '+(total>0?(barCorrect/total>=0.5?'good':'bad'):'');
+  $('barDirLabel').textContent=({Right:'➡',Left:'⬅',Stationary:'⏺'}[barDir])||'⏺';
+}
+
+function validateBarKeyPress(key){
+  barKeyPressed = key.toUpperCase();
+  const htmlDir = getBarWindowedDirection();
+  const expected = {Left:'A', Right:'D', Stationary:null}[htmlDir];
+  barDir = htmlDir;
+  if(expected === barKeyPressed){
+    barCorrect++;
+    log('g',`✅ 细杆正确: HTML检测=${htmlDir}, FlowAuto按下="${barKeyPressed}"`);
+  } else {
+    barWrong++;
+    log('r',`❌ 细杆错误: HTML检测=${htmlDir}, FlowAuto按下="${barKeyPressed}" (期望:"${expected||'无'}'")`);
+  }
+  updateBarStats(); evt();
+}
+
+function animBar(){
+  if(!barRunning){requestAnimationFrame(animBar);return;}
+  const aw = barArea.clientWidth;
+  barVX += (Math.random() - 0.5) * 0.3;
+  const spd = Math.abs(barVX);
+  if(spd > 8) barVX = (barVX / spd) * 8;
+  if(spd < 1.2) barVX = (Math.random() > 0.5 ? 3 : -3);
+  barX += barVX;
+  if(barX <= 0){ barX = 0; barVX = Math.abs(barVX) * (0.7 + Math.random() * 0.5); }
+  if(barX >= aw - barW){ barX = aw - barW; barVX = -Math.abs(barVX) * (0.7 + Math.random() * 0.5); }
+  bar.style.left = barX + 'px';
+  recordPosition(barHistory, barX + barW/2, 0);
+  requestAnimationFrame(animBar);
+}
+
+$('btnBarToggle').addEventListener('click',function(){barRunning=!barRunning;this.textContent=barRunning?'⏯️ 暂停':'▶️ 恢复';this.classList.toggle('active',barRunning);log('b',barRunning?'细杆运动恢复':'细杆暂停');evt();});
+$('btnBarNoise').addEventListener('click',()=>{generateBarNoise();evt();});
+$('btnBarSpeed').addEventListener('click',()=>{barVX=(Math.random()-0.5)*10;log('b','细杆速度随机化');evt();});
+$('btnResetBar').addEventListener('click',()=>{barCorrect=barWrong=0;barHistory.length=0;updateBarStats();log('b','🔄 细杆统计已重置');evt();});
+
+document.addEventListener('keydown',e=>{
+  const k=e.key.toUpperCase();
+  if(k==='A' || k==='D'){
+    validateBarKeyPress(k);
+  }
+  if(k===' '){e.preventDefault();$('btnBallToggle').click();}
+  if(k==='R'&&!e.ctrlKey){e.preventDefault();$('btnBallSpeed').click();}
+  if(k==='T'&&!e.ctrlKey){e.preventDefault();$('btnStateStart').click();}
+  if(k==='C'&&!e.ctrlKey){e.preventDefault();$('btnCalShuffle').click();}
+  if(k==='N'&&!e.ctrlKey){e.preventDefault();$('btnHsvNoise').click();}
+  if(e.key==='0'||e.key==='1'||e.key==='2'){
+    checkCalAnswer(e.key);
+  }
+});
+
+generateNoise();requestAnimationFrame(animHsvBall);
+log('b','🎯 面板2就绪 — HSV小球运动检测');
+
+generateBarNoise();requestAnimationFrame(animBar);
+log('b','📏 面板6就绪 — 细杆左右运动检测');
+
+// ==================== PANEL 3: HSV TEMPLATE MATCH (SHAPE MATCH) ====================
+const shapeArea=$('hsvShapeArea');
+const shapeTypes=[
+  {name:'circle', emoji:'●', cssClass:'hsv-shape-circle', label:'圆'},
+  {name:'square', emoji:'■', cssClass:'hsv-shape-square', label:'方'},
+  {name:'triangle', emoji:'▲', cssClass:'hsv-shape-triangle', label:'三角'},
+  {name:'diamond', emoji:'◆', cssClass:'hsv-shape-diamond', label:'菱形'},
+];
+let shapeTargetIdx=3;
+let shapes=[];
+let shapeTotal=0,shapeHit=0,shapeWrong=0,shapeMiss=0;
+const SHAPE_SIZE=30;
+const SHAPE_HIT_RADIUS=20;
+
+function generateShapeBg(){
+  const aw=shapeArea.clientWidth,ah=shapeArea.clientHeight;
+  if(aw===0||ah===0){setTimeout(generateShapeBg,300);return;}
+  let cv=shapeArea.querySelector('canvas');
+  if(!cv){cv=document.createElement('canvas');cv.className='hsv-shape-bg-canvas';shapeArea.appendChild(cv);}
+  cv.width=aw;cv.height=ah;
+  const ctx=cv.getContext('2d');
+
+  // Grid of tiles, each a variation of (0,255,136) — same green family, subtle differences
+  const tileSize=20+Math.floor(Math.random()*18);
+  const cols=Math.ceil(aw/tileSize);
+  const rows=Math.ceil(ah/tileSize);
+
+  for(let row=0;row<rows;row++){
+    for(let col=0;col<cols;col++){
+      const r=Math.floor(Math.random()*22);
+      const g=238+Math.floor(Math.random()*18);
+      const b=118+Math.floor(Math.random()*36);
+      ctx.fillStyle=`rgb(${r},${g},${b})`;
+      ctx.fillRect(col*tileSize,row*tileSize,tileSize+1,tileSize+1);
+    }
+  }
+}
+
+function createShapeEls(){
+  shapes.forEach(s=>s.el.remove());shapes=[];
+  const aw=shapeArea.clientWidth,ah=shapeArea.clientHeight;
+  if(aw===0||ah===0){setTimeout(createShapeEls,300);return;}
+  const margin=40;
+  const positions=[];
+  for(let i=0;i<4;i++){
+    let x,y,overlap,attempts=0;
+    do{
+      x=margin+Math.random()*(aw-2*margin);
+      y=margin+Math.random()*(ah-2*margin);
+      overlap=positions.some(p=>Math.hypot(p.x-x,p.y-y)<SHAPE_SIZE*2.2);
+      attempts++;
+    }while(overlap&&attempts<60);
+    positions.push({x,y});
+  }
+  for(let i=0;i<4;i++){
+    const type=shapeTypes[i];
+    const el=document.createElement('div');
+    el.className='hsv-shape '+type.cssClass;
+    el.style.left=(positions[i].x-SHAPE_SIZE/2)+'px';
+    el.style.top=(positions[i].y-SHAPE_SIZE/2)+'px';
+    shapeArea.appendChild(el);
+    shapes.push({type:type.name,el,index:i,cx:positions[i].x,cy:positions[i].y});
+  }
+  updateShapeTargetLabel();
+}
+
+function updateShapeTargetLabel(){
+  $('shapeTarget').textContent=shapeTypes[shapeTargetIdx].emoji+' '+shapeTypes[shapeTargetIdx].label;
+}
+
+function updateShapeStats(){
+  $('shapeTotal').textContent=shapeTotal;
+  $('shapeHit').textContent=shapeHit;
+  $('shapeWrong').textContent=shapeWrong;
+  $('shapeMiss').textContent=shapeMiss;
+  const total=shapeHit+shapeWrong+shapeMiss;
+  $('shapeRate').textContent=total>0?(shapeHit/total*100).toFixed(1)+'%':'-';
+  $('shapeRate').className='val '+(total>0?(shapeHit/total>=0.5?'good':'bad'):'');
+}
+
+// Click handler
+shapeArea.addEventListener('click',e=>{
+  const rect=shapeArea.getBoundingClientRect();
+  const cx=e.clientX-rect.left,cy=e.clientY-rect.top;
+  shapeTotal++;
+  let hitShape=null;
+  for(const s of shapes){
+    if(Math.hypot(cx-s.cx,cy-s.cy)<=SHAPE_HIT_RADIUS){
+      hitShape=s;break;
+    }
+  }
+  if(hitShape){
+    if(hitShape.index===shapeTargetIdx){
+      shapeHit++;
+      log('g',`✅ 正确命中目标! ${shapeTypes[shapeTargetIdx].emoji} ${shapeTypes[shapeTargetIdx].label} @(${Math.round(hitShape.cx)},${Math.round(hitShape.cy)})`);
+    }else{
+      shapeWrong++;
+      log('r',`❌ 错误形状! 点击${shapeTypes[hitShape.index].label}, 目标${shapeTypes[shapeTargetIdx].label}`);
+    }
+    // Visual marker
+    const m=document.createElement('div');
+    m.style.cssText='position:absolute;width:12px;height:12px;border-radius:50%;border:2px solid #fff;pointer-events:none;z-index:30;animation:markerFade 0.8s forwards;';
+    m.style.left=(hitShape.cx-6)+'px';m.style.top=(hitShape.cy-6)+'px';
+    m.style.borderColor=hitShape.index===shapeTargetIdx?'#34a853':'#ea4335';
+    shapeArea.appendChild(m);setTimeout(()=>m.remove(),800);
+  }else{
+    shapeMiss++;
+    log('y',`💨 脱靶! 未命中任何形状 (${Math.round(cx)},${Math.round(cy)})`);
+  }
+  updateShapeStats();evt();
+  // Reposition shapes after every click
+  createShapeEls();
+});
+
+// Buttons
+$('btnShapeShuffle').addEventListener('click',()=>{createShapeEls();log('b','🔀 形状布局已随机重排');evt();});
+$('btnShapeTarget').addEventListener('click',()=>{shapeTargetIdx=(shapeTargetIdx+1)%4;updateShapeTargetLabel();log('b',`🎯 目标形状切换: ${shapeTypes[shapeTargetIdx].label}`);evt();});
+$('btnResetShape').addEventListener('click',()=>{shapeTotal=shapeHit=shapeWrong=shapeMiss=0;updateShapeStats();log('b','🔄 形状匹配统计已重置');evt();});
+
+// Init with delay to ensure DOM layout is ready
+setTimeout(()=>{generateShapeBg();createShapeEls();},300);
+log('b','🔍 面板3就绪 — HSV过滤+TemplateMatch: 从相似背景中识别特定形状');
+
+// ==================== PANEL 4: COLORCAL ====================
+const calArea=$('colorCalArea');
+let calTargets=[];
+let calAutoMode=true;
+const calColors=['#31d8b7','#ff6b6b','#ffd93d','#6bcb77','#4d96ff'];
+const calNames=['A','B','C','D','E'];
+let calCurrentExpr='A.X < B.X ? (A.Y < B.Y ? 0 : 1) : 2';
+const calExpressions=[
+  {expr:'A.X < B.X ? (A.Y < B.Y ? 0 : 1) : 2',desc:'A在B左上→0, 左下→1, 右边→2'},
+  {expr:'Math.abs(A.X - C.X) < 30 ? 0 : (A.X < C.X ? 1 : 2)',desc:'AC水平距离<30→0, A在左→1, 右→2'},
+  {expr:'(A.X + B.X)/2 < C.X ? (C.Y < 100 ? 0 : 1) : 2',desc:'AB中点在C左且C在上→0, 中点左且C在下→1, 中点右→2'},
+  {expr:'D.Found ? (D.X > E.X ? (D.Y > E.Y ? 0 : 1) : 2) : 0',desc:'D在E右下→0, 右上→1, 左边→2'},
+];
+
+let calCorrect=0, calWrong=0, calCurrentResult=null;
+
+function createCalTargets(){
+  calTargets.forEach(t=>t.el.remove());calTargets=[];
+  const aw=calArea.clientWidth,ah=calArea.clientHeight;
+  for(let i=0;i<5;i++){
+    const el=document.createElement('div');el.className='cal-target';
+    el.style.width='36px';el.style.height='36px';
+    el.style.background=calColors[i];
+    el.style.left=(20+Math.random()*(aw-60))+'px';
+    el.style.top=(20+Math.random()*(ah-60))+'px';
+    const lbl=document.createElement('span');lbl.className='label';lbl.textContent=calNames[i];
+    el.appendChild(lbl);
+    calArea.appendChild(el);
+    calTargets.push({name:calNames[i],el,color:calColors[i]});
+  }
+  let exprEl=calArea.querySelector('.cal-expression');
+  if(!exprEl){exprEl=document.createElement('div');exprEl.className='cal-expression';calArea.appendChild(exprEl);}
+  exprEl.textContent='📐 '+calCurrentExpr;
+}
+
+function evaluateCalExpression(){
+  const data={};
+  calTargets.forEach(t=>{
+    const r=t.el.getBoundingClientRect();const ar=calArea.getBoundingClientRect();
+    data[t.name]={X:Math.round(r.left-ar.left+18),Y:Math.round(r.top-ar.top+18),Found:true};
+  });
+  let result;
+  try{
+    const A=data.A,B=data.B,C=data.C,D=data.D,E=data.E;
+    result=eval(calCurrentExpr.replace(/\b([A-E])\.(X|Y|Found)\b/g,'$1.$2'));
+  }catch(e){result='ERROR: '+e.message;}
+  $('calResult').textContent=result;
+  calCurrentResult=result;
+  $('calResult').className='val good';
+  $('calExpr').textContent=calCurrentExpr;
+  if(calAutoMode) log('b',`🧮 ColorCal: ${calCurrentExpr} → ${result}`);
+  evt();
+}
+
+function checkCalAnswer(userAnswer){
+  if(calCurrentResult===null || String(calCurrentResult).startsWith('ERROR')) return;
+  const correct=String(calCurrentResult)===String(userAnswer);
+  if(correct){ calCorrect++; log('g',`✅ ColorCal 回答正确! 期望:${calCurrentResult} 输入:${userAnswer}`); }
+  else{ calWrong++; log('r',`❌ ColorCal 回答错误! 期望:${calCurrentResult} 输入:${userAnswer}`); }
+  $('calCorrect').textContent=calCorrect;
+  $('calWrong').textContent=calWrong;
+  const total=calCorrect+calWrong;
+  $('calRate').textContent=total>0?(calCorrect/total*100).toFixed(1)+'%':'-';
+  $('calRate').className='val '+(total>0?(calCorrect/total>=0.5?'good':'bad'):'');
+  evt();
+  if(calAutoMode){
+    setTimeout(()=>{shuffleCalLayout();},400);
+  }
+}
+
+function shuffleCalLayout(){
+  const aw=calArea.clientWidth,ah=calArea.clientHeight;
+  calTargets.forEach(t=>{
+    t.el.style.left=(10+Math.random()*(aw-50))+'px';
+    t.el.style.top=(20+Math.random()*(ah-50))+'px';
+  });
+  setTimeout(evaluateCalExpression,450);
+  log('b','🔀 ColorCal目标随机布局');evt();
+}
+
+$('btnCalShuffle').addEventListener('click',shuffleCalLayout);
+$('btnCalEval').addEventListener('click',()=>{evaluateCalExpression();log('b','🔍 手动求值 ColorCal 表达式');});
+$('btnCalAuto').addEventListener('click',function(){calAutoMode=!calAutoMode;this.classList.toggle('active',calAutoMode);this.textContent=calAutoMode?'🔄 自动检测':'▶️ 手动检测';log('b','ColorCal自动检测: '+(calAutoMode?'开启':'关闭'));evt();});
+$('btnResetCal').addEventListener('click',()=>{calCorrect=calWrong=0;calCurrentResult=null;$('calCorrect').textContent='0';$('calWrong').textContent='0';$('calRate').textContent='-';calCurrentExpr=calExpressions[Math.floor(Math.random()*calExpressions.length)].expr;$('calExpr').textContent=calCurrentExpr;createCalTargets();setTimeout(evaluateCalExpression,500);log('b','🔄 ColorCal已重置，新表达式: '+calCurrentExpr);evt();});
+
+createCalTargets();setTimeout(evaluateCalExpression,500);
+log('b','🧮 面板4就绪 — ColorCal 颜色计算表达式验证');
+
+// ==================== PANEL 5: STATECHANGE ====================
+let stateIdx=0,stateTotal=0,stateCorrect=0,stateMissed=0,stateAuto=true;
+let stateReactionTimes=[];
+let stateTimer=null,stateTimeoutTimer=null,stateTickTimer=null;
+let stateStartTime=0;
+const states=[
+  {emoji:'🟢',label:'绿色',color:'#34a853'},
+  {emoji:'🔴',label:'红色',color:'#ea4335'},
+  {emoji:'🟡',label:'黄色',color:'#fbbc04'},
+  {emoji:'🔵',label:'蓝色',color:'#4285f4'},
+  {emoji:'🟣',label:'紫色',color:'#9c27b0'},
+];
+
+function setStateVisual(idx){
+  const s=states[idx];
+  $('stateIndicator').textContent=s.emoji;
+  $('stateLabel').textContent=s.label;
+  $('stateLabel').style.color=s.color;
+}
+
+function updateStateStats(){
+  $('stateTotal').textContent=stateTotal;
+  $('stateCorrect').textContent=stateCorrect;
+  $('stateMissed').textContent=stateMissed;
+  const avg=stateCorrect>0?(stateReactionTimes.reduce((a,b)=>a+b,0)/stateReactionTimes.length).toFixed(0)+'ms':'-';
+  $('stateAvgTime').textContent=avg;
+}
+
+function startStateCycle(){
+  if(stateTimer) clearTimeout(stateTimer);
+  if(stateTimeoutTimer) clearTimeout(stateTimeoutTimer);
+  if(stateTickTimer) clearInterval(stateTickTimer);
+  setStateVisual(0);
+  $('stateTimer').style.display='none';
+  stateStartTime=0;
+  if(!stateAuto) return;
+  const delay=1500+Math.random()*4000;
+  stateTimer=setTimeout(()=>{
+    const nextIdx=1+Math.floor(Math.random()*(states.length-1));
+    setStateVisual(nextIdx);
+    stateIdx=nextIdx;
+    stateStartTime=performance.now();
+    $('stateTimer').style.display='block';
+    $('stateTimer').textContent='0ms';
+    stateTickTimer=setInterval(()=>{
+      if(stateStartTime>0){
+        $('stateTimer').textContent=(performance.now()-stateStartTime).toFixed(0)+'ms';
+      }
+    },50);
+    stateTimeoutTimer=setTimeout(()=>{
+      stateMissed++;
+      stateTotal++;
+      if(stateTickTimer) clearInterval(stateTickTimer);
+      log('r',`❌ 状态变化漏检! ${states[nextIdx].label} → 超时未点击`);
+      updateStateStats();evt();
+      startStateCycle();
+    },3000);
+  },delay);
+}
+
+$('stateArea').addEventListener('click',()=>{
+  if(stateIdx===0 || stateStartTime===0) return;
+  const rt=performance.now()-stateStartTime;
+  stateReactionTimes.push(rt);
+  stateCorrect++;
+  stateTotal++;
+  if(stateTickTimer) clearInterval(stateTickTimer);
+  if(stateTimeoutTimer) clearTimeout(stateTimeoutTimer);
+  stateTimeoutTimer=null;
+  stateStartTime=0;
+  log('g',`✅ 状态变化反应: ${states[stateIdx].label} → 点击 ${rt.toFixed(0)}ms`);
+  updateStateStats();evt();
+  setStateVisual(0);
+  stateIdx=0;
+  $('stateTimer').style.display='none';
+  if(stateAuto){
+    const delay=800+Math.random()*1500;
+    if(stateTimer) clearTimeout(stateTimer);
+    stateTimer=setTimeout(startStateCycle,delay);
+  }
+});
+
+$('btnStateStart').addEventListener('click',()=>{
+  if(!stateAuto){
+    startStateCycle();
+  } else {
+    if(stateTimer) clearTimeout(stateTimer);
+    startStateCycle();
+  }
+  log('b','▶️ StateChange手动触发');evt();
+});
+$('btnStateAuto').addEventListener('click',function(){
+  stateAuto=!stateAuto;
+  this.classList.toggle('active',stateAuto);
+  this.textContent=stateAuto?'🔄 自动':'▶️ 手动';
+  log('b','StateChange自动模式: '+(stateAuto?'开启':'关闭'));
+  if(stateAuto) startStateCycle();
+  else {
+    if(stateTimer) clearTimeout(stateTimer);
+    if(stateTimeoutTimer) clearTimeout(stateTimeoutTimer);
+    if(stateTickTimer) clearInterval(stateTickTimer);
+  }
+  evt();
+});
+$('btnResetState').addEventListener('click',()=>{
+  stateTotal=stateCorrect=stateMissed=0;
+  stateReactionTimes=[];
+  if(stateTimer) clearTimeout(stateTimer);
+  if(stateTimeoutTimer) clearTimeout(stateTimeoutTimer);
+  if(stateTickTimer) clearInterval(stateTickTimer);
+  updateStateStats();
+  setStateVisual(0);
+  stateIdx=0;
+  stateStartTime=0;
+  $('stateTimer').style.display='none';
+  log('b','🔄 StateChange统计已重置');
+  if(stateAuto) startStateCycle();
+  evt();
+});
+
+setStateVisual(0);
+$('stateTimer').style.display='none';
+if(stateAuto) startStateCycle();
+log('b','🔔 面板5就绪 — StateChange 反应时间验证');
+
+// ==================== UTILITY ====================
+$('btnClearLog').addEventListener('click',()=>{logEl.innerHTML='';log('b','日志已清空');});
+$('btnExport').addEventListener('click',()=>{
+  const report={
+    timestamp:new Date().toISOString(),elapsed:Math.floor((Date.now()-startTime)/1000)+'s',
+    ball:{total:clickTotal,hit:clickHit,miss:clickMiss,rate:clickTotal>0?(clickHit/clickTotal*100).toFixed(1)+'%':'N/A'},
+    hsv:{total:hsvClickTotal,hit:hsvClickHit,miss:hsvClickMiss,rate:hsvClickTotal>0?(hsvClickHit/hsvClickTotal*100).toFixed(1)+'%':'N/A'},
+    shapeMatch:{target:shapeTypes[shapeTargetIdx].label,total:shapeTotal,hit:shapeHit,wrong:shapeWrong,miss:shapeMiss,rate:shapeHit+shapeWrong+shapeMiss>0?(shapeHit/(shapeHit+shapeWrong+shapeMiss)*100).toFixed(1)+'%':'N/A'},
+    colorcal:{expr:calCurrentExpr,result:$('calResult').textContent,correct:calCorrect,wrong:calWrong,rate:calCorrect+calWrong>0?(calCorrect/(calCorrect+calWrong)*100).toFixed(1)+'%':'N/A'},
+    state:{total:stateTotal,correct:stateCorrect,missed:stateMissed,avgTime:stateCorrect>0?(stateReactionTimes.reduce((a,b)=>a+b,0)/stateReactionTimes.length).toFixed(0)+'ms':'N/A'},
+  };
+  console.log('=== FlowAuto v2 Test Report ===',JSON.stringify(report,null,2));
+  log('w','📥 测试报告已导出到控制台 (F12查看)');
+  evt();
+});
+
+$('btnAutoTest').addEventListener('click',async ()=>{
+  log('w','🚀 启动自动综合测试...');
+  // Test 1: Click ball
+  const ballRect=ball.getBoundingClientRect();const areaRect=ballArea.getBoundingClientRect();
+  const bcx=ballRect.left-areaRect.left+bR,bcy=ballRect.top-areaRect.top+bR;
+  ballArea.dispatchEvent(new MouseEvent('click',{clientX:areaRect.left+bcx,clientY:areaRect.top+bcy,bubbles:true}));
+  await new Promise(r=>setTimeout(r,300));
+  // Test 2: HSV click
+  const hsvRect=hsvBall.getBoundingClientRect();const hsvAreaRect=hsvArea.getBoundingClientRect();
+  const hcx=hsvRect.left-hsvAreaRect.left+hR,hcy=hsvRect.top-hsvAreaRect.top+hR;
+  hsvArea.dispatchEvent(new MouseEvent('click',{clientX:hsvAreaRect.left+hcx,clientY:hsvAreaRect.top+hcy,bubbles:true}));
+  await new Promise(r=>setTimeout(r,300));
+  // Test 3: ColorCal shuffle + evaluate
+  shuffleCalLayout();
+  await new Promise(r=>setTimeout(r,600));
+  // Test 4: State change click
+  if(stateIdx!==0){
+    const stateRect=$('stateArea').getBoundingClientRect();
+    $('stateArea').dispatchEvent(new MouseEvent('click',{clientX:stateRect.left+stateRect.width/2,clientY:stateRect.top+stateRect.height/2,bubbles:true}));
+  }
+  await new Promise(r=>setTimeout(r,200));
+  // Test 5: Shape match click target
+  if(shapes.length>0){
+    const targetShape=shapes[shapeTargetIdx];
+    const saRect=shapeArea.getBoundingClientRect();
+    shapeArea.dispatchEvent(new MouseEvent('click',{clientX:saRect.left+targetShape.cx,clientY:saRect.top+targetShape.cy,bubbles:true}));
+  }
+  await new Promise(r=>setTimeout(r,200));
+  log('w','✅ 自动综合测试完成! 查看上方统计数据');
+  evt();
+});
+
+// ==================== INIT ====================
+log('w','═══════════════════════════════════════');
+log('w','🧪 FlowAuto v2 测试套件 — 结果验证版 初始化完成');
+log('w','═══════════════════════════════════════');
+log('b','📋 快捷键: Space=暂停小球 | AD=细杆方向 | C=洗牌ColorCal | N=重绘噪声 | T=开始状态测试 | 0/1/2=ColorCal作答');
+log('b','💡 面板1: 鼠标点击小球→自动统计命中率 (测试ClickElement)');
+log('b','💡 面板2: 点击运动小球→统计命中率 (测试ColorMotion)');
+log('b','💡 面板3: HSV过滤+Template Match→从同色系背景中识别特定形状 (测试ClickElement HSV模式)');
+log('b','💡 面板4: 表达式求值→按0/1/2作答并统计 (测试ColorCal)');
+log('b','💡 面板5: 颜色变化→点击记录反应时间 (测试StateChange)');
+log('w','✅ 所有面板就绪 — 可配合 FlowAuto .flow.json 进行自动化验证');
+</script>
+</body>
+</html>

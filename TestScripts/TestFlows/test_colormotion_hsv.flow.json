@@ -1,0 +1,261 @@
+{
+  "FlowName": "test_colormotion_hsv.flow",
+  "Version": "1.0",
+  "CreatedAt": "2026-06-19",
+  "Nodes": [
+    {
+      "NodeId": "n_colormotion_right",
+      "NodeType": 7,
+      "NodeName": "Detect Right Motion",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 2,
+      "Parameters": {
+        "MotionMode": "DirectionDetect",
+        "TargetWindow": "FlowAuto v2",
+        "TargetRgb": "0,255,136",
+        "HueTolerance": 0,
+        "SVTolerance": 30,
+        "TemplateImagePath": "E:\\AutoScript\\FlowAuto\\FlowAuto\\bin\\Debug\\net8.0-windows10.0.19041.0\\win-x64\\Templates\\snip_20260619_003230.png",
+        "TemplateMatchThreshold": 0,
+        "MoveCheckIntervalMs": 50,
+        "MoveDurationMs": 10000,
+        "UseFullScreen": false,
+        "Region": {
+          "X": 657,
+          "Y": 484,
+          "Width": 608,
+          "Height": 181
+        },
+        "TrackMode": "ColorTrack",
+        "StateCheckIntervalMs": 100,
+        "StateDurationMs": 30000,
+        "ColorChangeThreshold": 0.15,
+        "ReferenceImagePath": "E:\\AutoScript\\FlowAuto\\FlowAuto\\bin\\Debug\\net8.0-windows10.0.19041.0\\win-x64\\Templates\\snip_20260619_003230.png"
+      },
+      "CanvasX": 307,
+      "CanvasY": 334,
+      "Children": [],
+      "DirectionBranches": {
+        "Right": [
+          {
+            "NodeId": "n_press_d",
+            "NodeType": 3,
+            "NodeName": "Press D (Right)",
+            "Enabled": true,
+            "TimeoutMs": 5000,
+            "RetryCount": 1,
+            "Parameters": {
+              "KeyScanCode": 32,
+              "KeyName": "D",
+              "PressMode": "Press",
+              "HoldDurationMs": 100,
+              "TargetWindow": "FlowAuto v2"
+            },
+            "CanvasX": 300,
+            "CanvasY": 250,
+            "Children": []
+          }
+        ],
+        "Left": [
+          {
+            "NodeId": "n_press_a",
+            "NodeType": 3,
+            "NodeName": "Press A (Left)",
+            "Enabled": true,
+            "TimeoutMs": 5000,
+            "RetryCount": 1,
+            "Parameters": {
+              "KeyScanCode": 30,
+              "KeyName": "A",
+              "PressMode": "Press",
+              "HoldDurationMs": 100,
+              "TargetWindow": "FlowAuto v2"
+            },
+            "CanvasX": 300,
+            "CanvasY": 350,
+            "Children": []
+          }
+        ],
+        "Up": [
+          {
+            "NodeId": "n_press_w",
+            "NodeType": 3,
+            "NodeName": "Press W (Up)",
+            "Enabled": true,
+            "TimeoutMs": 5000,
+            "RetryCount": 1,
+            "Parameters": {
+              "KeyScanCode": 17,
+              "KeyName": "W",
+              "PressMode": "Press",
+              "HoldDurationMs": 100,
+              "TargetWindow": "FlowAuto v2"
+            },
+            "CanvasX": 300,
+            "CanvasY": 450,
+            "Children": []
+          }
+        ],
+        "Down": [
+          {
+            "NodeId": "n_press_s",
+            "NodeType": 3,
+            "NodeName": "Press S (Down)",
+            "Enabled": true,
+            "TimeoutMs": 5000,
+            "RetryCount": 1,
+            "Parameters": {
+              "KeyScanCode": 31,
+              "KeyName": "S",
+              "PressMode": "Press",
+              "HoldDurationMs": 100,
+              "TargetWindow": "FlowAuto v2"
+            },
+            "CanvasX": 300,
+            "CanvasY": 550,
+            "Children": []
+          }
+        ],
+        "Stationary": [
+          {
+            "NodeId": "n_wait_short",
+            "NodeType": 2,
+            "NodeName": "Wait 500ms (stationary)",
+            "Enabled": true,
+            "TimeoutMs": 5000,
+            "RetryCount": 1,
+            "Parameters": {
+              "ConditionType": "Timeout",
+              "WaitMs": 500
+            },
+            "CanvasX": 300,
+            "CanvasY": 650,
+            "Children": []
+          }
+        ]
+      }
+    },
+    {
+      "NodeId": "89c7ed39-87e2-4e29-b850-bb1c716fe8b9",
+      "NodeType": 4,
+      "NodeName": "test",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {
+        "LoopCount": 40,
+        "LoopMode": "FixedCount"
+      },
+      "CanvasX": 309,
+      "CanvasY": 162,
+      "Children": []
+    },
+    {
+      "NodeId": "61979b53-745c-466f-b11b-fdf046761434",
+      "NodeType": 10,
+      "NodeName": "test",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {},
+      "CanvasX": 316,
+      "CanvasY": 729,
+      "Children": [],
+      "PairedLoopStartId": "89c7ed39-87e2-4e29-b850-bb1c716fe8b9"
+    },
+    {
+      "NodeId": "369dd87e-8804-41ff-8a64-e35c26e76b66",
+      "NodeType": 0,
+      "NodeName": "New StartProgram",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {
+        "FilePath": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+        "WorkingDirectory": "",
+        "Arguments": "file:///e:/AutoScript/FlowAuto/TestScripts/FlowAuto_TestSuite_v2.html",
+        "RunAsAdmin": false,
+        "WaitForWindowMs": 5000,
+        "WindowTitleKeyword": ""
+      },
+      "CanvasX": 311,
+      "CanvasY": 30,
+      "Children": []
+    },
+    {
+      "NodeId": "cdaee222-f709-4d04-8a39-3de60ad62277",
+      "NodeType": 3,
+      "NodeName": "New KeyPress",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {
+        "KeyScanCode": 30,
+        "KeyName": "A",
+        "PressMode": "Press",
+        "HoldDurationMs": 50,
+        "TargetWindow": "FlowAuto v2"
+      },
+      "CanvasX": 192,
+      "CanvasY": 533,
+      "Children": []
+    },
+    {
+      "NodeId": "31b2bbe7-bbc3-4d9c-9e93-b106d27f65f8",
+      "NodeType": 3,
+      "NodeName": "New KeyPress",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {
+        "KeyScanCode": 32,
+        "KeyName": "D",
+        "PressMode": "Press",
+        "HoldDurationMs": 50,
+        "TargetWindow": "FlowAuto v2"
+      },
+      "CanvasX": 431,
+      "CanvasY": 534,
+      "Children": []
+    }
+  ],
+  "Connections": [
+    {
+      "FromId": "369dd87e-8804-41ff-8a64-e35c26e76b66",
+      "ToId": "89c7ed39-87e2-4e29-b850-bb1c716fe8b9",
+      "FromPort": "Output",
+      "ToPort": "Input"
+    },
+    {
+      "FromId": "89c7ed39-87e2-4e29-b850-bb1c716fe8b9",
+      "ToId": "n_colormotion_right",
+      "FromPort": "True",
+      "ToPort": "Input"
+    },
+    {
+      "FromId": "n_colormotion_right",
+      "ToId": "cdaee222-f709-4d04-8a39-3de60ad62277",
+      "FromPort": "Left",
+      "ToPort": "Input"
+    },
+    {
+      "FromId": "n_colormotion_right",
+      "ToId": "31b2bbe7-bbc3-4d9c-9e93-b106d27f65f8",
+      "FromPort": "Right",
+      "ToPort": "Input"
+    },
+    {
+      "FromId": "cdaee222-f709-4d04-8a39-3de60ad62277",
+      "ToId": "61979b53-745c-466f-b11b-fdf046761434",
+      "FromPort": "Output",
+      "ToPort": "Input"
+    },
+    {
+      "FromId": "31b2bbe7-bbc3-4d9c-9e93-b106d27f65f8",
+      "ToId": "61979b53-745c-466f-b11b-fdf046761434",
+      "FromPort": "Output",
+      "ToPort": "Input"
+    }
+  ]
+}

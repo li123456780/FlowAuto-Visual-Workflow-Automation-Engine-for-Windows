@@ -1,0 +1,40 @@
+## .NET
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+*.log
+
+# NuGet
+*.nupkg
+*.snupkg
+**/packages/*
+!**/packages/build/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build output
+publish*/
+flowauto_v*/
+selfcontainedpublish/
+
+# Temporary/unnamed files
+unnamed*.flow.json
+
+# Templates and debug output
+**/Templates/
+**/debug_match/
+**/debug_ocr/
+**/debug_*.png
+
+# OS files
+.DS_Store
+Thumbs.db

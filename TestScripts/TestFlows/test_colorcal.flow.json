@@ -1,0 +1,240 @@
+{
+  "FlowName": "test_colorcal.flow",
+  "Version": "1.0",
+  "CreatedAt": "2026-06-19",
+  "Nodes": [
+    {
+      "NodeId": "6c77be5a-49cd-40e9-b339-f9a45fcd9ccb",
+      "NodeType": 0,
+      "NodeName": "New StartProgram",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {
+        "FilePath": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+        "WorkingDirectory": "",
+        "Arguments": "file:///e:/AutoScript/FlowAuto/TestScripts/FlowAuto_TestSuite_v2.html",
+        "RunAsAdmin": false,
+        "WaitForWindowMs": 5000,
+        "WindowTitleKeyword": ""
+      },
+      "CanvasX": 216,
+      "CanvasY": 98,
+      "Children": []
+    },
+    {
+      "NodeId": "db396195-63d7-4cd5-9b76-13c62559e387",
+      "NodeType": 2,
+      "NodeName": "New Wait",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {
+        "TargetWindow": "FlowAuto v2",
+        "ConditionType": "WindowExist",
+        "Region": {
+          "X": 0,
+          "Y": 0,
+          "Width": 200,
+          "Height": 200
+        },
+        "UseFullScreen": true,
+        "TemplateImagePath": "",
+        "TemplateMatchThreshold": 0.8,
+        "CheckIntervalMs": 500
+      },
+      "CanvasX": 211,
+      "CanvasY": 223,
+      "Children": []
+    },
+    {
+      "NodeId": "e8fc1e35-e3fb-4c24-82fb-2c98b23b7e56",
+      "NodeType": 4,
+      "NodeName": "New Loop",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {
+        "LoopCount": 20,
+        "LoopMode": "FixedCount"
+      },
+      "CanvasX": 210,
+      "CanvasY": 337,
+      "Children": []
+    },
+    {
+      "NodeId": "73e1bb19-0fed-4448-af80-894f3ae73aac",
+      "NodeType": 10,
+      "NodeName": "Loop End",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {},
+      "CanvasX": 221,
+      "CanvasY": 759,
+      "Children": [],
+      "PairedLoopStartId": "e8fc1e35-e3fb-4c24-82fb-2c98b23b7e56"
+    },
+    {
+      "NodeId": "cf3a2ffa-0e9f-463b-b37e-30bafd8508c9",
+      "NodeType": 8,
+      "NodeName": "New ColorCal",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {
+        "DetectionTargets": [
+          {
+            "Name": "A",
+            "TargetWindow": "FlowAuto v2",
+            "Region": {
+              "X": 1297,
+              "Y": 207,
+              "Width": 600,
+              "Height": 177
+            },
+            "UseFullScreen": false,
+            "TargetRgb": "49,218,183",
+            "HueTolerance": 8,
+            "SVTolerance": 30,
+            "TrackMode": "ColorTrack",
+            "TemplateImagePath": "",
+            "TemplateMatchThreshold": 0.8
+          },
+          {
+            "Name": "Target2",
+            "TargetWindow": "FlowAuto v2",
+            "Region": {
+              "X": 1297,
+              "Y": 207,
+              "Width": 600,
+              "Height": 177
+            },
+            "UseFullScreen": false,
+            "TargetRgb": "255,107,107",
+            "HueTolerance": 8,
+            "SVTolerance": 30,
+            "TrackMode": "ColorTrack",
+            "TemplateImagePath": "",
+            "TemplateMatchThreshold": 0.8
+          }
+        ],
+        "Expression": "A.X \u003C B.X ? (A.Y \u003C B.Y ? 0 : 1) : 2",
+        "SuccessorCount": 3
+      },
+      "CanvasX": 206,
+      "CanvasY": 472,
+      "Children": []
+    },
+    {
+      "NodeId": "726c9010-777a-4428-ab6b-7af55befdba5",
+      "NodeType": 3,
+      "NodeName": "New KeyPress",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {
+        "KeyScanCode": 11,
+        "KeyName": "0",
+        "PressMode": "Press",
+        "HoldDurationMs": 500,
+        "TargetWindow": "FlowAuto v2"
+      },
+      "CanvasX": 47,
+      "CanvasY": 611,
+      "Children": []
+    },
+    {
+      "NodeId": "2ab84b6e-2b6a-4766-a545-9a48f9c89b7a",
+      "NodeType": 3,
+      "NodeName": "New KeyPress",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {
+        "KeyScanCode": 2,
+        "KeyName": "1",
+        "PressMode": "Press",
+        "HoldDurationMs": 500,
+        "TargetWindow": "FlowAuto v2"
+      },
+      "CanvasX": 213,
+      "CanvasY": 618,
+      "Children": []
+    },
+    {
+      "NodeId": "86e5ce30-4d30-43ab-87b2-32f4c634dbf8",
+      "NodeType": 3,
+      "NodeName": "New KeyPress",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {
+        "KeyScanCode": 3,
+        "KeyName": "2",
+        "PressMode": "Press",
+        "HoldDurationMs": 500,
+        "TargetWindow": "FlowAuto v2"
+      },
+      "CanvasX": 378,
+      "CanvasY": 619,
+      "Children": []
+    }
+  ],
+  "Connections": [
+    {
+      "FromId": "6c77be5a-49cd-40e9-b339-f9a45fcd9ccb",
+      "ToId": "db396195-63d7-4cd5-9b76-13c62559e387",
+      "FromPort": "Output",
+      "ToPort": "Input"
+    },
+    {
+      "FromId": "db396195-63d7-4cd5-9b76-13c62559e387",
+      "ToId": "e8fc1e35-e3fb-4c24-82fb-2c98b23b7e56",
+      "FromPort": "Output",
+      "ToPort": "Input"
+    },
+    {
+      "FromId": "e8fc1e35-e3fb-4c24-82fb-2c98b23b7e56",
+      "ToId": "cf3a2ffa-0e9f-463b-b37e-30bafd8508c9",
+      "FromPort": "True",
+      "ToPort": "Input"
+    },
+    {
+      "FromId": "cf3a2ffa-0e9f-463b-b37e-30bafd8508c9",
+      "ToId": "726c9010-777a-4428-ab6b-7af55befdba5",
+      "FromPort": "0",
+      "ToPort": "Input"
+    },
+    {
+      "FromId": "cf3a2ffa-0e9f-463b-b37e-30bafd8508c9",
+      "ToId": "2ab84b6e-2b6a-4766-a545-9a48f9c89b7a",
+      "FromPort": "1",
+      "ToPort": "Input"
+    },
+    {
+      "FromId": "cf3a2ffa-0e9f-463b-b37e-30bafd8508c9",
+      "ToId": "86e5ce30-4d30-43ab-87b2-32f4c634dbf8",
+      "FromPort": "2",
+      "ToPort": "Input"
+    },
+    {
+      "FromId": "726c9010-777a-4428-ab6b-7af55befdba5",
+      "ToId": "73e1bb19-0fed-4448-af80-894f3ae73aac",
+      "FromPort": "Output",
+      "ToPort": "Input"
+    },
+    {
+      "FromId": "2ab84b6e-2b6a-4766-a545-9a48f9c89b7a",
+      "ToId": "73e1bb19-0fed-4448-af80-894f3ae73aac",
+      "FromPort": "Output",
+      "ToPort": "Input"
+    },
+    {
+      "FromId": "86e5ce30-4d30-43ab-87b2-32f4c634dbf8",
+      "ToId": "73e1bb19-0fed-4448-af80-894f3ae73aac",
+      "FromPort": "Output",
+      "ToPort": "Input"
+    }
+  ]
+}

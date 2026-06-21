@@ -1,0 +1,157 @@
+154: 
+155: ### 场景2: 图片显隐 — WaitCondition
+156: 
+157: **面板位置**: 中上 — 🖼️ 图片出现/消失
+158: 
+159: **测试目标**: 验证 WaitCondition 节点的 ImageAppear 和 ImageDisappear 条件轮询功能。
+160: 
+161: **随机性设计**:
+162: - 6种不同的目标图形（圆形靶标🎯、星形⭐、勾号✅、警告⚠️、钻石💎、圆形🔵）
+163: - 目标图片位置随机移动（X, Y 随机）
+164: - "随机显隐"模式：随机延迟 0.5s~3.5s 后开始最多 8 次随机显隐切换，每次间隔 0.5s~3.5s 随机
+165: - 图形形状随机切换
+166: 
+167: **测试步骤**:
+168: 
+169: | 步骤 | 操作 | 预期结果 | FlowAuto 节点 |
+170: |---|---|---|---|
+171: | 1 | 确保目标图片可见 | — | — |
+172: | 2 | 在 FlowAuto 中配置 WaitCondition(ImageAppear) | 立即条件满足 | `WaitCondition` |
+173: | 3 | 点击"👁️ 切换可见性"隐藏图片 | 图片消失 | — |
+174: | 4 | 在 FlowAuto 中启动 WaitCondition(ImageDisappear) | 条件立即满足（已隐藏） | `WaitCondition` |
+175: | 5 | 点击"🎲 随机显隐" | 图片随机出现/消失 | — |
+176: | 6 | 同时运行 ImageAppear 等待 | 在图片出现时条件满足 | `WaitCondition` |
+177: | 7 | 切换到不同图形 (🔷随机图形) | 验证不同模板的匹配 | `WaitCondition` |
+178: 
+179: **FlowAuto 配置要点**:
+180: ```
+181: WaitCondition 节点:
+182:   ConditionType: ImageAppear 或 ImageDisappear
+183:   TemplateImagePath: 需要预先截取目标图形的截图作为模板
+184:   CheckIntervalMs: 500 (推荐)
+185:   TimeoutMs: 30000
+186:   TemplateMatchThreshold: 0.8
+187: 
+188: 提示: 不同图形需要不同的模板图片。
+189: 建议先截图保存每种图形的截图作为模板文件。
+190: ```
+191: 
+192: **截图模板采集方法**:
+193: 1. 用 FlowAuto 内置截图工具截取当前显示的目标图形
+194: 2. 或使用 Win+Shift+S 截取
+195: 3. 保存到 `TestScripts/templates/` 目录下
+196: 4. 命名建议: `target_arrow.png`, `target_star.png`, `target_check.png` 等
+197: 
+198: ---
+199: 
+200: ### 场景3: 文本识别 — OCR / OCRContain
+201: 
+202: **面板位置**: 右上 — 📝 文本识别
+203: 
+204: **测试目标**: 验证 OCR 文本检测功能，包括 WaitCondition OCRContain 和 ClickElement OCR 定位。
+205: 
+206: **随机性设计**:
+207: - 10种预设文本随机切换（FLOWAUTO, READY, CLICK ME, TARGET, SUCCESS, FAILED, WAITING, GO!, PASS, NEXT）
+208: - 文本颜色随机切换（7种颜色）
+209: - 文本大小随机切换（16px~64px）
+210: - "闪烁模式"：文本以随机间隔（400ms~1000ms）闪烁
+211: 
+212: **测试步骤**:
+213: 
+214: | 步骤 | 操作 | 预期结果 | FlowAuto 节点 |
+215: |---|---|---|---|
+216: | 1 | 记下当前显示的文本 | — | — |
+217: | 2 | 配置 WaitCondition(OCRContain) 查找当前文本 | 条件立即满足 | `WaitCondition` |
+218: | 3 | 点击"🎲 随机文本" | 文本更换 | — |
+219: | 4 | 观察 OCRContain 是否检测到文本变化 | 与预设文本匹配 | `WaitCondition` |
+220: | 5 | 点击"💫 闪烁模式" | 文本开始闪烁 | — |
+221: | 6 | 验证 OCR 在闪烁状态下能否正确识别 | OCR 应能捕获可见时刻 | `WaitCondition` |
+222: | 7 | 使用 ClickElement(OCR) 定位文本并点击 | 鼠标移至文本中心 | `ClickElement` |
+223: 
+224: **FlowAuto 配置要点**:
+225: ```
+226: WaitCondition 节点:
+227:   ConditionType: OCRContain
+228:   OCRText: "FLOWAUTO" (或当前显示的文本)
+229:   UseFullScreen: false
+230:   Region: 文本显示区域
+231: 
+232: ClickElement 节点:
+233:   LocateMode: OCR
+234:   OCRText: "FLOWAUTO"
+235: ```
+236: 
+237: > ⚠️ **重要提示**: OCR 依赖系统语言包。FlowAuto 使用 Windows OCR 引擎。
+238: > 确保系统已安装对应语言（英文 en-US 已默认安装，中文需要额外添加）。
+239: 
+240: ---
+241: 
+242: ### 场景4: 颜色检测 — ColorCal
+243: 
+244: **面板位置**: 左下 — 🎨 颜色检测
+245: 
+246: **测试目标**: 验证 ColorCal 多目标颜色识别、坐标计算和表达式求值功能。
+247: 
+248: **随机性设计**:
+249: - 5个颜色点（Target A~E），每个有不同的固定颜色
+250: - "随机洗牌"：打乱所有点在区域内的位置
+251: - "随机变色"：随机选择一个点变为随机 RGB 颜色
+252: - "随机闪烁"：随机选择一个点以随机间隔闪烁（模拟状态变化）
+253: 
+254: **测试步骤**:
+255: 
+256: | 步骤 | 操作 | 预期结果 | FlowAuto 节点 |
+257: |---|---|---|---|
+258: | 1 | 记录各颜色点的初始位置和颜色 | — | — |
+259: | 2 | 配置 ColorCal 检测 5 个目标 | 识别到 5 个目标及其坐标 | `ColorCal` |
+260: | 3 | 使用表达式计算 TargetA.X > TargetB.X | 根据实际位置返回 0 或 1 | `ColorCal` |
+261: | 4 | 点击"🔀 随机洗牌" | 位置打乱 | — |
+262: | 5 | 重新执行 ColorCal | 识别到新的坐标 | `ColorCal` |
+263: | 6 | 点击"🎲 随机变色" | 某点颜色改变 | — |
+264: | 7 | 该点的 .Found 应变 false | 颜色不匹配导致未找到 | `ColorCal` |
+265: | 8 | 使用 ColorMotion(StateChange) 监听闪烁点 | 检测到状态变化 | `ColorMotion` |
+266: 
+267: **示例 ColorCal 表达式**:
+268: 
+269: ```csharp
+270: // 检测 TargetA 是否在 TargetB 左边
+271: TargetA.Found && TargetB.Found ? (TargetA.X < TargetB.X ? 0 : 1) : 2
+272: 
+273: // 检测 TargetC 距离 TargetD 是否小于 100px
+274: TargetC.Found && TargetD.Found ? 
+275:   (Math.Sqrt(Math.Pow(TargetC.X - TargetD.X, 2) + Math.Pow(TargetC.Y - TargetD.Y, 2)) < 100 ? 0 : 1) 
+276:   : 2
+277: 
+278: // 统计找到多少个目标
+279: (TargetA.Found ? 1 : 0) + (TargetB.Found ? 1 : 0) + 
+280: (TargetC.Found ? 1 : 0) + (TargetD.Found ? 1 : 0) + 
+281: (TargetE.Found ? 1 : 0)
+282: ```
+283: 
+284: ---
+285: 
+286: ### 场景5: 方向检测 — ColorMotion DirectionDetect
+287: 
+288: **面板位置**: 中下 — 🧭 方向检测
+289: 
+290: **测试目标**: 验证 ColorMotion DirectionDetect 模式的 5 方向（上/下/左/右/静止）检测能力。
+291: 
+292: **随机性设计**:
+293: - 自动循环切换 5 个方向（默认启用，2秒间隔）
+294: - "随机方向"按钮随机跳到任意方向
+295: - "切换速度"随机改变为 500ms/1s/2s/3s/5s 之一
+296: 
+297: **测试步骤**:
+298: 
+299: | 步骤 | 操作 | 预期结果 | FlowAuto 节点 |
+300: |---|---|---|---|
+301: | 1 | 观察方向指示器循环切换 | — | — |
+302: | 2 | 配置 ColorMotion(DirectionDetect) | 检测到当前方向 | `ColorMotion` |
+303: | 3 | 方向变为 "上" 时 → 触发 Up 输出端口 | Up 分支被执行 | `ColorMotion` |
+304: | 4 | 方向变为 "静止" 时 → 触发 Stationary 输出 | Stationary 分支被执行 | `ColorMotion` |
+305: | 5 | 使用两个 ColorMotion 节点 + Gate(AND) | 检测组合方向（如右上） | `ColorMotion` + `Gate` |
+306: 
+307: **对角线检测示例**:
+308: ```
+309: ColorMotion Node 1 → 检测 "Right"
+310: ColorMotion Node 2 → 检测 "Up"

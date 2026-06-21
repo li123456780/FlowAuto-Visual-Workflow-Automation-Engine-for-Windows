@@ -1,0 +1,134 @@
+{
+  "FlowName": "test_click_element.flow",
+  "Version": "1.0",
+  "CreatedAt": "2026-06-18",
+  "Nodes": [
+    {
+      "NodeId": "n_start",
+      "NodeType": 0,
+      "NodeName": "Launch Test Page",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 1,
+      "Parameters": {
+        "FilePath": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+        "Arguments": "file:///d:/AutoScript/FlowAuto/TestScripts/FlowAuto_TestSuite_v2.html",
+        "WindowTitleKeyword": "FlowAuto v2",
+        "WaitForWindowMs": 5000,
+        "WorkingDirectory": "",
+        "RunAsAdmin": false
+      },
+      "CanvasX": 100,
+      "CanvasY": 100,
+      "Children": []
+    },
+    {
+      "NodeId": "n_wait_window",
+      "NodeType": 2,
+      "NodeName": "Wait Test Page Loaded",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {
+        "TargetWindow": "FlowAuto v2",
+        "ConditionType": "WindowExist",
+        "CheckIntervalMs": 1000,
+        "UseFullScreen": true,
+        "Region": {
+          "X": 0,
+          "Y": 0,
+          "Width": 0,
+          "Height": 0
+        }
+      },
+      "CanvasX": 106,
+      "CanvasY": 214,
+      "Children": []
+    },
+    {
+      "NodeId": "12b93422-521f-41f0-bdb6-d42310210252",
+      "NodeType": 1,
+      "NodeName": "New Click",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {
+        "TargetWindow": "FlowAuto v2",
+        "LocateMode": "TemplateMatch",
+        "Region": {
+          "X": 22,
+          "Y": 201,
+          "Width": 607,
+          "Height": 208
+        },
+        "UseFullScreen": false,
+        "TemplateImagePath": "D:\\AutoScript\\FlowAuto\\selfcontainedpublish\\Templates\\snip_20260618_174829.png",
+        "TemplateMatchThreshold": 0.6,
+        "TemplateScaleRange": {
+          "Min": 0.5,
+          "Max": 1.5,
+          "Step": 0.1
+        },
+        "PreDelayMs": 0,
+        "PostDelayMs": 0
+      },
+      "CanvasX": 117,
+      "CanvasY": 467,
+      "Children": []
+    },
+    {
+      "NodeId": "31161c3a-761b-484e-b684-a9d334cfc51b",
+      "NodeType": 4,
+      "NodeName": "Click Ball Loop (10\u6B21)",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {
+        "LoopCount": 20,
+        "LoopMode": "FixedCount"
+      },
+      "CanvasX": 116,
+      "CanvasY": 337,
+      "Children": []
+    },
+    {
+      "NodeId": "3b2ae651-bd07-4b07-81dd-e4c6f5a4a601",
+      "NodeType": 10,
+      "NodeName": "Click Ball Loop (10\u6B21)",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {},
+      "CanvasX": 126,
+      "CanvasY": 602,
+      "Children": [],
+      "PairedLoopStartId": "31161c3a-761b-484e-b684-a9d334cfc51b"
+    }
+  ],
+  "Connections": [
+    {
+      "FromId": "n_start",
+      "ToId": "n_wait_window",
+      "FromPort": "Output",
+      "ToPort": "Input"
+    },
+    {
+      "FromId": "n_wait_window",
+      "ToId": "31161c3a-761b-484e-b684-a9d334cfc51b",
+      "FromPort": "Output",
+      "ToPort": "Input"
+    },
+    {
+      "FromId": "31161c3a-761b-484e-b684-a9d334cfc51b",
+      "ToId": "12b93422-521f-41f0-bdb6-d42310210252",
+      "FromPort": "True",
+      "ToPort": "Input"
+    },
+    {
+      "FromId": "12b93422-521f-41f0-bdb6-d42310210252",
+      "ToId": "3b2ae651-bd07-4b07-81dd-e4c6f5a4a601",
+      "FromPort": "Output",
+      "ToPort": "Input"
+    }
+  ]
+}

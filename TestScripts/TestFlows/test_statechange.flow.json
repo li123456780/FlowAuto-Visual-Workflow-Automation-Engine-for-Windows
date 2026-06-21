@@ -1,0 +1,175 @@
+{
+  "FlowName": "test_statechange.flow",
+  "Version": "1.0",
+  "CreatedAt": "2026-06-19",
+  "Nodes": [
+    {
+      "NodeId": "n_statechange_green",
+      "NodeType": 7,
+      "NodeName": "Detect Green Change",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 2,
+      "Parameters": {
+        "MotionMode": "StateChange",
+        "TargetWindow": "FlowAuto v2",
+        "TargetRgb": "95,227,152",
+        "HueTolerance": 8,
+        "SVTolerance": 30,
+        "StateCheckIntervalMs": 200,
+        "StateDurationMs": 15000,
+        "ColorChangeThreshold": 0.15,
+        "UseFullScreen": false,
+        "Region": {
+          "X": 301,
+          "Y": 572,
+          "Width": 46,
+          "Height": 41
+        }
+      },
+      "CanvasX": 264,
+      "CanvasY": 428,
+      "Children": [],
+      "TrueBranch": [
+        {
+          "NodeId": "n_state_detected",
+          "NodeType": 3,
+          "NodeName": "State Change Detected!",
+          "Enabled": true,
+          "TimeoutMs": 5000,
+          "RetryCount": 1,
+          "Parameters": {
+            "KeyName": "T",
+            "KeyScanCode": 20,
+            "PressMode": "Press",
+            "TargetWindow": "FlowAuto v2"
+          },
+          "CanvasX": 400,
+          "CanvasY": 250,
+          "Children": []
+        }
+      ],
+      "FalseBranch": [
+        {
+          "NodeId": "n_state_timeout",
+          "NodeType": 2,
+          "NodeName": "No Change \u2014 Timeout",
+          "Enabled": true,
+          "TimeoutMs": 5000,
+          "RetryCount": 1,
+          "Parameters": {
+            "ConditionType": "Timeout",
+            "WaitMs": 500
+          },
+          "CanvasX": 400,
+          "CanvasY": 350,
+          "Children": []
+        }
+      ]
+    },
+    {
+      "NodeId": "f4ec280d-bfc3-408c-8d79-147973c61567",
+      "NodeType": 1,
+      "NodeName": "New Click",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {
+        "TargetWindow": "FlowAuto v2",
+        "LocateMode": "Coordinate",
+        "Region": {
+          "X": 292,
+          "Y": 558,
+          "Width": 66,
+          "Height": 72
+        },
+        "UseFullScreen": true,
+        "TemplateImagePath": "",
+        "TemplateMatchThreshold": 0.8,
+        "TemplateScaleRange": {
+          "Min": 0.5,
+          "Max": 1.5,
+          "Step": 0.1
+        },
+        "PreDelayMs": 0,
+        "PostDelayMs": 50
+      },
+      "CanvasX": 234,
+      "CanvasY": 580,
+      "Children": []
+    },
+    {
+      "NodeId": "4874bcd3-b69c-4835-b141-1363e0ddcb42",
+      "NodeType": 4,
+      "NodeName": "New Loop",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {
+        "LoopCount": 10,
+        "LoopMode": "FixedCount"
+      },
+      "CanvasX": 294,
+      "CanvasY": 293,
+      "Children": []
+    },
+    {
+      "NodeId": "871029ca-64a7-4d89-b437-12d37811fc99",
+      "NodeType": 10,
+      "NodeName": "Loop End",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {},
+      "CanvasX": 243,
+      "CanvasY": 721,
+      "Children": [],
+      "PairedLoopStartId": "4874bcd3-b69c-4835-b141-1363e0ddcb42"
+    },
+    {
+      "NodeId": "edc13929-adb6-41c9-9202-1f9e779a1958",
+      "NodeType": 0,
+      "NodeName": "New StartProgram",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {
+        "FilePath": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+        "WorkingDirectory": "",
+        "Arguments": "file:///e:/AutoScript/FlowAuto/TestScripts/FlowAuto_TestSuite_v2.html",
+        "RunAsAdmin": false,
+        "WaitForWindowMs": 5000,
+        "WindowTitleKeyword": ""
+      },
+      "CanvasX": 305,
+      "CanvasY": 162,
+      "Children": []
+    }
+  ],
+  "Connections": [
+    {
+      "FromId": "n_statechange_green",
+      "ToId": "f4ec280d-bfc3-408c-8d79-147973c61567",
+      "FromPort": "True",
+      "ToPort": "Input"
+    },
+    {
+      "FromId": "4874bcd3-b69c-4835-b141-1363e0ddcb42",
+      "ToId": "n_statechange_green",
+      "FromPort": "True",
+      "ToPort": "Input"
+    },
+    {
+      "FromId": "f4ec280d-bfc3-408c-8d79-147973c61567",
+      "ToId": "871029ca-64a7-4d89-b437-12d37811fc99",
+      "FromPort": "Output",
+      "ToPort": "Input"
+    },
+    {
+      "FromId": "edc13929-adb6-41c9-9202-1f9e779a1958",
+      "ToId": "4874bcd3-b69c-4835-b141-1363e0ddcb42",
+      "FromPort": "Output",
+      "ToPort": "Input"
+    }
+  ]
+}

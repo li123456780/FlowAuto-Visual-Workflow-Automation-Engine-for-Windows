@@ -1,0 +1,140 @@
+{
+  "FlowName": "test_click_matchhsv.flow",
+  "Version": "1.0",
+  "CreatedAt": "2026-06-21",
+  "Nodes": [
+    {
+      "NodeId": "b3e8dc91-646f-4c19-baf9-68246c364276",
+      "NodeType": 1,
+      "NodeName": "New Click",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {
+        "TargetWindow": "FlowAuto v2",
+        "LocateMode": "HSVTemplateMatch",
+        "Region": {
+          "X": 1286,
+          "Y": 196,
+          "Width": 618,
+          "Height": 187
+        },
+        "UseFullScreen": false,
+        "TemplateImagePath": "E:\\AutoScript\\FlowAuto\\FlowAuto\\bin\\Debug\\net8.0-windows10.0.19041.0\\win-x64\\Templates\\snip_20260621_010048.png",
+        "TemplateMatchThreshold": 0.6,
+        "TemplateScaleRange": {
+          "Min": 0.5,
+          "Max": 1.5,
+          "Step": 0.1
+        },
+        "PreDelayMs": 0,
+        "PostDelayMs": 5,
+        "ReferenceImagePath": "E:\\AutoScript\\FlowAuto\\FlowAuto\\bin\\Debug\\net8.0-windows10.0.19041.0\\win-x64\\Templates\\snip_20260621_010048.png",
+        "HueTolerance": 0,
+        "SVTolerance": 0,
+        "TargetRgb": "0,255,136"
+      },
+      "CanvasX": 209,
+      "CanvasY": 451,
+      "Children": []
+    },
+    {
+      "NodeId": "8756d434-405f-421a-8696-baeb4cbb1310",
+      "NodeType": 0,
+      "NodeName": "New StartProgram",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {
+        "FilePath": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+        "WorkingDirectory": "",
+        "Arguments": "file:///e:/AutoScript/FlowAuto/TestScripts/FlowAuto_TestSuite_v2.html",
+        "RunAsAdmin": false,
+        "WaitForWindowMs": 5000,
+        "WindowTitleKeyword": ""
+      },
+      "CanvasX": 217,
+      "CanvasY": 30,
+      "Children": []
+    },
+    {
+      "NodeId": "28afbd02-09ce-435e-a393-1f0ab3c9d27a",
+      "NodeType": 4,
+      "NodeName": "New Loop",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {
+        "LoopCount": 20,
+        "LoopMode": "FixedCount"
+      },
+      "CanvasX": 212,
+      "CanvasY": 297,
+      "Children": []
+    },
+    {
+      "NodeId": "f7696daa-790a-4cc3-b58b-03849b81236b",
+      "NodeType": 10,
+      "NodeName": "Loop End",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {},
+      "CanvasX": 212,
+      "CanvasY": 595,
+      "Children": [],
+      "PairedLoopStartId": "28afbd02-09ce-435e-a393-1f0ab3c9d27a"
+    },
+    {
+      "NodeId": "bc0c95fc-49b8-428a-b9de-360203893d19",
+      "NodeType": 2,
+      "NodeName": "New Wait",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {
+        "TargetWindow": "FlowAuto v2",
+        "ConditionType": "WindowExist",
+        "Region": {
+          "X": 0,
+          "Y": 0,
+          "Width": 200,
+          "Height": 200
+        },
+        "UseFullScreen": true,
+        "TemplateImagePath": "",
+        "TemplateMatchThreshold": 0.8,
+        "CheckIntervalMs": 500
+      },
+      "CanvasX": 223,
+      "CanvasY": 148,
+      "Children": []
+    }
+  ],
+  "Connections": [
+    {
+      "FromId": "28afbd02-09ce-435e-a393-1f0ab3c9d27a",
+      "ToId": "b3e8dc91-646f-4c19-baf9-68246c364276",
+      "FromPort": "True",
+      "ToPort": "Input"
+    },
+    {
+      "FromId": "b3e8dc91-646f-4c19-baf9-68246c364276",
+      "ToId": "f7696daa-790a-4cc3-b58b-03849b81236b",
+      "FromPort": "Output",
+      "ToPort": "Input"
+    },
+    {
+      "FromId": "8756d434-405f-421a-8696-baeb4cbb1310",
+      "ToId": "bc0c95fc-49b8-428a-b9de-360203893d19",
+      "FromPort": "Output",
+      "ToPort": "Input"
+    },
+    {
+      "FromId": "bc0c95fc-49b8-428a-b9de-360203893d19",
+      "ToId": "28afbd02-09ce-435e-a393-1f0ab3c9d27a",
+      "FromPort": "Output",
+      "ToPort": "Input"
+    }
+  ]
+}

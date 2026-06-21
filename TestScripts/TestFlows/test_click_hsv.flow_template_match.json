@@ -1,0 +1,109 @@
+{
+  "FlowName": "test_click_hsv.flow_template_match",
+  "Version": "1.0",
+  "CreatedAt": "2026-06-20",
+  "Nodes": [
+    {
+      "NodeId": "b3e8dc91-646f-4c19-baf9-68246c364276",
+      "NodeType": 1,
+      "NodeName": "New Click",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {
+        "TargetWindow": "FlowAuto v2",
+        "LocateMode": "HSVTemplateMatch",
+        "Region": {
+          "X": 661,
+          "Y": 206,
+          "Width": 602,
+          "Height": 175
+        },
+        "UseFullScreen": false,
+        "TemplateImagePath": "E:\\AutoScript\\FlowAuto\\FlowAuto\\bin\\Debug\\net8.0-windows10.0.19041.0\\win-x64\\Templates\\snip_20260619_232921.png",
+        "TemplateMatchThreshold": 0.8,
+        "TemplateScaleRange": {
+          "Min": 0.5,
+          "Max": 1.5,
+          "Step": 0.1
+        },
+        "PreDelayMs": 0,
+        "PostDelayMs": 5,
+        "ReferenceImagePath": "E:\\AutoScript\\FlowAuto\\FlowAuto\\bin\\Debug\\net8.0-windows10.0.19041.0\\win-x64\\Templates\\snip_20260619_234849.png",
+        "HueTolerance": 20,
+        "SVTolerance": 40,
+        "TargetRgb": "0,255,136"
+      },
+      "CanvasX": 211,
+      "CanvasY": 451,
+      "Children": []
+    },
+    {
+      "NodeId": "8756d434-405f-421a-8696-baeb4cbb1310",
+      "NodeType": 0,
+      "NodeName": "New StartProgram",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {
+        "FilePath": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+        "WorkingDirectory": "",
+        "Arguments": "file:///e:/AutoScript/FlowAuto/TestScripts/FlowAuto_TestSuite_v2.html",
+        "RunAsAdmin": false,
+        "WaitForWindowMs": 5000,
+        "WindowTitleKeyword": ""
+      },
+      "CanvasX": 214,
+      "CanvasY": 168,
+      "Children": []
+    },
+    {
+      "NodeId": "28afbd02-09ce-435e-a393-1f0ab3c9d27a",
+      "NodeType": 4,
+      "NodeName": "New Loop",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {
+        "LoopCount": 20,
+        "LoopMode": "FixedCount"
+      },
+      "CanvasX": 212,
+      "CanvasY": 298,
+      "Children": []
+    },
+    {
+      "NodeId": "f7696daa-790a-4cc3-b58b-03849b81236b",
+      "NodeType": 10,
+      "NodeName": "Loop End",
+      "Enabled": true,
+      "TimeoutMs": 30000,
+      "RetryCount": 3,
+      "Parameters": {},
+      "CanvasX": 212,
+      "CanvasY": 595,
+      "Children": [],
+      "PairedLoopStartId": "28afbd02-09ce-435e-a393-1f0ab3c9d27a"
+    }
+  ],
+  "Connections": [
+    {
+      "FromId": "28afbd02-09ce-435e-a393-1f0ab3c9d27a",
+      "ToId": "b3e8dc91-646f-4c19-baf9-68246c364276",
+      "FromPort": "True",
+      "ToPort": "Input"
+    },
+    {
+      "FromId": "8756d434-405f-421a-8696-baeb4cbb1310",
+      "ToId": "28afbd02-09ce-435e-a393-1f0ab3c9d27a",
+      "FromPort": "Output",
+      "ToPort": "Input"
+    },
+    {
+      "FromId": "b3e8dc91-646f-4c19-baf9-68246c364276",
+      "ToId": "f7696daa-790a-4cc3-b58b-03849b81236b",
+      "FromPort": "Output",
+      "ToPort": "Input"
+    }
+  ]
+}

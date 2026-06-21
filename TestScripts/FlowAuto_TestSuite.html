@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowAuto 测试套件 | FlowAuto Test Suite</title>
+<style>
+  :root {
+    --bg: #1e1e23;
+    --panel-bg: #25252a;
+    --border: #3c3c41;
+    --text: #dcdcdc;
+    --text-muted: #969696;
+    --accent: #4285f4;
+    --success: #34a853;
+    --warning: #fbbc04;
+    --danger: #ea4335;
+    --ball-color: #31d8b7;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ===== Header ===== */
+  .header {
+    background: var(--panel-bg);
+    border-bottom: 2px solid var(--border);
+    padding: 10px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    height: 50px;
+  }
+  .header h1 { font-size: 18px; color: var(--accent); }
+  .header .status { font-size: 12px; color: var(--text-muted); }
+  .header .status span { color: var(--success); font-weight:bold; }
+
+  /* ===== Main Layout ===== */
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 8px;
+    padding: 8px;
+    height: calc(100vh - 50px);
+  }
+
+  /* ===== Panel ===== */
+  .panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    display:flex;
+    flex-direction:column;
+    overflow: hidden;
+    position: relative;
+  }
+  .panel h2 {
+    font-size: 13px;
+    color: var(--accent);
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+    display:flex;
+    align-items:center;
+    gap: 6px;
+  }
+  .panel h2 .badge {
+    font-size: 10px;
+    background: var(--accent);
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 10px;
+  }
+  .panel-content {
+    flex:1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ===== Panel 1: Ball Chase ===== */
+  #ballArea {
+    background: #1a1a1e;
+    border-radius: 4px;
+    cursor: crosshair;
+    position: relative;
+    flex: 1;
+    min-height: 120px;
+  }
+  .ball {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #5fffea, var(--ball-color));
+    box-shadow: 0 0 20px rgba(49,216,183,0.5);
+    transition: none;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .ball-label {
+    position: absolute;
+    background: rgba(0,0,0,0.7);
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 11;
+  }
+  .ball-info {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    text-align: center;
+  }
+  .ball-info span { color: var(--ball-color); font-weight: bold; }
+
+  /* ===== Panel 2: Image Appear/Disappear ===== */
+  #imageArea {
+    background: #1a1a1e;
+    border-radius: 4px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex:1;
+    position: relative;
+    min-height: 120px;
+  }
+  #targetImage {
+    max-width: 80%;
+    max-height: 80%;
+    transition: opacity 0.3s;
+    image-rendering: pixelated;
+  }
+  .image-status {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    text-align: center;
+  }
+  .image-status span.visible { color: var(--success); }
+  .image-status span.hidden { color: var(--danger); }
+
+  /* ===== Panel 3: OCR Text Area ===== */
+  #ocrArea {
+    background: #1a1a1e;
+    border-radius: 4px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex:1;
+    position: relative;
+    min-height: 120px;
+  }
+  #ocrText {
+    font-size: 32px;
+    font-weight: bold;
+    letter-spacing: 4px;
+    transition: color 0.3s;
+  }
+  .ocr-info {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    text-align: center;
+  }
+
+  /* ===== Panel 4: Color Detection Area ===== */
+  #colorArea {
+    background: #1a1a1e;
+    border-radius: 4px;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:center;
+    gap: 16px;
+    flex:1;
+    position: relative;
+    min-height: 120px;
+  }
+  .color-dot {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.3s;
+    box-shadow: 0 0 16px rgba(255,255,255,0.15);
+    position: relative;
+  }
+  .color-dot:hover { transform: scale(1.2); }
+  .color-dot .dot-label {
+    position: absolute;
+    bottom: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  /* ===== Panel 5: Motion Direction Indicator ===== */
+  #motionArea {
+    background: #1a1a1e;
+    border-radius: 4px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex:1;
+    position: relative;
+    min-height: 120px;
+  }
+  .direction-arrow {
+    font-size: 60px;
+    transition: transform 0.5s;
+    display: inline-block;
+  }
+  .motion-info {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    text-align: center;
+  }
+  .motion-info span { color: var(--warning); font-weight: bold; }
+
+  /* ===== Panel 6: Event Log ===== */
+  #logPanel {
+    grid-column: 1 / -1;
+    max-height: 120px;
+  }
+  #logArea {
+    background: #0d0d0f;
+    border-radius: 4px;
+    flex:1;
+    overflow-y: auto;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 11px;
+    padding: 6px 10px;
+    color: #8b8b8b;
+    min-height: 60px;
+    line-height: 1.6;
+  }
+  #logArea .log-time { color: #569cd6; }
+  #logArea .log-event { color: var(--success); }
+  #logArea .log-state { color: var(--warning); }
+  #logArea .log-error { color: var(--danger); }
+
+  /* ===== Controls ===== */
+  .controls {
+    display:flex;
+    gap: 6px;
+    flex-wrap:wrap;
+    margin-top: 8px;
+  }
+  button {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 5px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    transition: background 0.2s, border-color 0.2s;
+    font-family: inherit;
+  }
+  button:hover { background: #3a3a40; border-color: var(--accent); }
+  button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.danger { border-color: var(--danger); color: var(--danger); }
+  button.danger:hover { background: var(--danger); color: #fff; }
+  button.success { border-color: var(--success); color: var(--success); }
+  button.success:hover { background: var(--success); color: #fff; }
+
+  /* Speed slider */
+  .speed-control {
+    display:flex;
+    align-items:center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .speed-control input[type=range] {
+    width: 80px;
+    accent-color: var(--accent);
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🧪 FlowAuto Test Suite</h1>
+  <div class="status">
+    🟢 运行中 | 测试时间: <span id="elapsedTime">00:00</span> |
+    事件数: <span id="eventCount">0</span>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- Panel 1: Ball Chase (测试鼠标跟踪 ClickElement / ColorMotion) -->
+  <div class="panel">
+    <h2>🏀 小球追踪 <span class="badge">ClickElement / ColorMotion</span></h2>
+    <div class="panel-content">
+      <div id="ballArea">
+        <div id="ball" class="ball" style="width:36px;height:36px;"></div>
+      </div>
+      <div class="ball-info">
+        位置: <span id="ballPos">(0, 0)</span> |
+        速度: <span id="ballSpeed">0 px/s</span> |
+        方向: <span id="ballDir">→</span>
+      </div>
+    </div>
+    <div class="controls">
+      <button id="btnBallToggle" class="active" title="暂停/恢复小球运动">⏯️ 暂停小球</button>
+      <button id="btnBallSpeed" title="随机改变小球速度">🎲 随机速度</button>
+      <button id="btnBallColor" title="随机改变小球颜色">🎨 随机颜色</button>
+      <button id="btnBallSize" title="随机改变小球大小">📏 随机大小</button>
+      <div class="speed-control">
+        <span>速度:</span>
+        <input type="range" id="speedSlider" min="1" max="10" value="4" step="0.5">
+        <span id="speedLabel">4x</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel 2: Image Appear/Disappear (测试 WaitCondition ImageAppear/ImageDisappear) -->
+  <div class="panel">
+    <h2>🖼️ 图片出现/消失 <span class="badge">WaitCondition</span></h2>
+    <div class="panel-content">
+      <div id="imageArea">
+        <div id="targetImage" style="width:120px;height:120px;background:var(--accent);border-radius:12px;
+          display:flex;align-items:center;justify-content:center;font-size:48px;">🎯</div>
+      </div>
+      <div class="image-status">
+        状态: <span id="imageState" class="visible">🟢 可见 (可见)</span> |
+        出现次数: <span id="imageAppearCount">0</span> |
+        消失次数: <span id="imageDisappearCount">0</span>
+      </div>
+    </div>
+    <div class="controls">
+      <button id="btnImageToggle" class="active" title="显示/隐藏目标图片">👁️ 切换可见性</button>
+      <button id="btnImageRandom" title="随机出现/消失（带随机延迟）">🎲 随机显隐</button>
+      <button id="btnImageShape" title="随机改变目标图形">🔷 随机图形</button>
+      <button id="btnImagePosition" title="随机改变图片位置">📍 随机位置</button>
+    </div>
+  </div>
+
+  <!-- Panel 3: OCR Text (测试 WaitCondition OCRContain / OCR 识别) -->
+  <div class="panel">
+    <h2>📝 文本识别 <span class="badge">OCR / OCRContain</span></h2>
+    <div class="panel-content">
+      <div id="ocrArea">
+        <div id="ocrText">FLOWAUTO</div>
+      </div>
+      <div class="ocr-info">
+        当前文本: <span id="currentOcrText">FLOWAUTO</span> |
+        更换次数: <span id="ocrChangeCount">0</span>
+      </div>
+    </div>
+    <div class="controls">
+      <button id="btnOcrRandom" title="随机更换文本内容">🎲 随机文本</button>
+      <button id="btnOcrColor" title="随机改变文本颜色">🎨 随机颜色</button>
+      <button id="btnOcrSize" title="随机改变文本大小">📏 随机大小</button>
+      <button id="btnOcrBlink" title="文本闪烁效果">💫 闪烁模式</button>
+    </div>
+  </div>
+
+  <!-- Panel 4: Color Detection (测试 ColorCal / 颜色检测) -->
+  <div class="panel">
+    <h2>🎨 颜色检测 <span class="badge">ColorCal</span></h2>
+    <div class="panel-content">
+      <div id="colorArea">
+        <div class="color-dot" style="background:#31d8b7;" data-color="#31d8b7">
+          <span class="dot-label">Target A</span>
+        </div>
+        <div class="color-dot" style="background:#ff6b6b;" data-color="#ff6b6b">
+          <span class="dot-label">Target B</span>
+        </div>
+        <div class="color-dot" style="background:#ffd93d;" data-color="#ffd93d">
+          <span class="dot-label">Target C</span>
+        </div>
+        <div class="color-dot" style="background:#6bcb77;" data-color="#6bcb77">
+          <span class="dot-label">Target D</span>
+        </div>
+        <div class="color-dot" style="background:#4d96ff;" data-color="#4d96ff">
+          <span class="dot-label">Target E</span>
+        </div>
+      </div>
+    </div>
+    <div class="controls">
+      <button id="btnColorShuffle" title="随机洗牌颜色点位置">🔀 随机洗牌</button>
+      <button id="btnColorRandom" title="随机改变一个点的颜色">🎲 随机变色</button>
+      <button id="btnColorBlink" title="随机闪烁一个颜色点">✨ 随机闪烁</button>
+    </div>
+  </div>
+
+  <!-- Panel 5: Motion Direction (测试 ColorMotion DirectionDetect) -->
+  <div class="panel">
+    <h2>🧭 方向检测 <span class="badge">ColorMotion DirectionDetect</span></h2>
+    <div class="panel-content">
+      <div id="motionArea">
+        <div class="direction-arrow" id="directionArrow">⬆️</div>
+      </div>
+      <div class="motion-info">
+        当前方向: <span id="currentDirection">上</span> |
+        变更次数: <span id="directionChangeCount">0</span>
+      </div>
+    </div>
+    <div class="controls">
+      <button id="btnDirRandom" title="随机切换方向">🎲 随机方向</button>
+      <button id="btnDirCycle" class="active" title="自动循环切换方向">🔄 自动循环</button>
+      <button id="btnDirSpeed" title="改变方向切换速度">⏱️ 切换速度</button>
+    </div>
+  </div>
+
+  <!-- Panel 6: Event Log -->
+  <div class="panel" id="logPanel">
+    <h2>📋 事件日志 <span class="badge">Log</span></h2>
+    <div id="logArea"></div>
+    <div class="controls">
+      <button id="btnClearLog" title="清空日志">🗑️ 清空日志</button>
+      <button id="btnExportState" title="导出当前状态">📥 导出状态</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ==================== FLOWAUTO TEST SUITE ENGINE ====================
+
+// --- Logger ---
+const logArea = document.getElementById('logArea');
+function log(level, msg) {
+  const time = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+  const cls = level === 'ERROR' ? 'log-error' : level === 'STATE' ? 'log-state' : 'log-event';
+  logArea.innerHTML += `<span class="log-time">[${time}]</span> <span class="${cls}">[${level}]</span> ${msg}\n`;
+  logArea.scrollTop = logArea.scrollHeight;
+  // Trim old entries
+  const lines = logArea.innerHTML.split('\n');
+  if (lines.length > 200) {
+    logArea.innerHTML = lines.slice(-200).join('\n');
+  }
+}
+
+// --- Global State ---
+const state = {
+  startTime: Date.now(),
+  eventCount: 0,
+  ballRunning: true,
+  ballX: 100, ballY: 80,
+  ballVX: 2.5, ballVY: 1.8,
+  ballSize: 36,
+  ballColor: '#31d8b7',
+  ballSpeedMultiplier: 4,
+  imageVisible: true,
+  imageAppearCount: 0,
+  imageDisappearCount: 0,
+  imageShape: 0,
+  ocrTexts: ['FLOWAUTO', 'READY', 'CLICK ME', 'TARGET', 'SUCCESS', 'FAILED', 'WAITING', 'GO!', 'PASS', 'NEXT'],
+  ocrIndex: 0,
+  ocrBlinking: false,
+  direction: 'Up',
+  directionCycle: true,
+  directionSpeed: 2000,
+};
+
+// --- Event Counter ---
+function incEvent() { state.eventCount++; document.getElementById('eventCount').textContent = state.eventCount; }
+
+// --- Timer ---
+setInterval(() => {
+  const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+  const m = Math.floor(elapsed / 60).toString().padStart(2, '0');
+  const s = (elapsed % 60).toString().padStart(2, '0');
+  document.getElementById('elapsedTime').textContent = `${m}:${s}`;
+}, 1000);
+
+// ==================== PANEL 1: BALL CHASE ====================
+const ballArea = document.getElementById('ballArea');
+const ball = document.getElementById('ball');
+
+function updateBallSize() {
+  ball.style.width = state.ballSize + 'px';
+  ball.style.height = state.ballSize + 'px';
+}
+
+function updateBallColor() {
+  ball.style.background = `radial-gradient(circle at 35% 35%, #fff, ${state.ballColor})`;
+  ball.style.boxShadow = `0 0 ${state.ballSize/2}px ${state.ballColor}88`;
+}
+
+function getBallCenter() {
+  return {
+    x: state.ballX + state.ballSize / 2,
+    y: state.ballY + state.ballSize / 2
+  };
+}
+
+function animateBall() {
+  if (!state.ballRunning) {
+    requestAnimationFrame(animateBall);
+    return;
+  }
+
+  const areaW = ballArea.clientWidth;
+  const areaH = ballArea.clientHeight;
+  const spd = state.ballSpeedMultiplier;
+
+  // Random perturbation for natural movement
+  state.ballVX += (Math.random() - 0.5) * 0.3;
+  state.ballVY += (Math.random() - 0.5) * 0.3;
+
+  // Clamp speed
+  const maxSpd = 8;
+  const len = Math.sqrt(state.ballVX**2 + state.ballVY**2);
+  if (len > maxSpd) { state.ballVX = state.ballVX / len * maxSpd; state.ballVY = state.ballVY / len * maxSpd; }
+  if (len < 0.5) { state.ballVX = (Math.random() - 0.5) * 4; state.ballVY = (Math.random() - 0.5) * 4; }
+
+  state.ballX += state.ballVX * spd * 0.5;
+  state.ballY += state.ballVY * spd * 0.5;
+
+  // Bounce off walls with random energy
+  if (state.ballX <= 0) { state.ballX = 0; state.ballVX = Math.abs(state.ballVX) * (0.7 + Math.random() * 0.6); incEvent(); log('EVENT', '小球撞左墙'); }
+  if (state.ballX >= areaW - state.ballSize) { state.ballX = areaW - state.ballSize; state.ballVX = -Math.abs(state.ballVX) * (0.7 + Math.random() * 0.6); incEvent(); log('EVENT', '小球撞右墙'); }
+  if (state.ballY <= 0) { state.ballY = 0; state.ballVY = Math.abs(state.ballVY) * (0.7 + Math.random() * 0.6); incEvent(); log('EVENT', '小球撞上墙'); }
+  if (state.ballY >= areaH - state.ballSize) { state.ballY = areaH - state.ballSize; state.ballVY = -Math.abs(state.ballVY) * (0.7 + Math.random() * 0.6); incEvent(); log('EVENT', '小球撞下墙'); }
+
+  ball.style.left = state.ballX + 'px';
+  ball.style.top = state.ballY + 'px';
+
+  // Update info
+  const c = getBallCenter();
+  const spdNow = Math.sqrt(state.ballVX**2 + state.ballVY**2).toFixed(1);
+  const dirs = ['→', '↗', '↑', '↖', '←', '↙', '↓', '↘'];
+  const angle = Math.atan2(-state.ballVY, state.ballVX) * 180 / Math.PI;
+  const dirIdx = Math.round(((angle + 360) % 360) / 45) % 8;
+  document.getElementById('ballPos').textContent = `(${Math.round(c.x)}, ${Math.round(c.y)})`;
+  document.getElementById('ballSpeed').textContent = spdNow + ' px/s';
+  document.getElementById('ballDir').textContent = dirs[dirIdx];
+
+  requestAnimationFrame(animateBall);
+}
+
+// Ball controls
+document.getElementById('btnBallToggle').addEventListener('click', function() {
+  state.ballRunning = !state.ballRunning;
+  this.textContent = state.ballRunning ? '⏯️ 暂停小球' : '▶️ 恢复小球';
+  this.classList.toggle('active', state.ballRunning);
+  log('STATE', state.ballRunning ? '小球运动恢复' : '小球运动暂停 — 测试 WaitCondition 超时场景');
+  incEvent();
+});
+
+document.getElementById('btnBallSpeed').addEventListener('click', () => {
+  state.ballVX = (Math.random() - 0.5) * 10;
+  state.ballVY = (Math.random() - 0.5) * 10;
+  log('EVENT', `小球速度随机化: VX=${state.ballVX.toFixed(2)}, VY=${state.ballVY.toFixed(2)}`);
+  incEvent();
+});
+
+document.getElementById('btnBallColor').addEventListener('click', () => {
+  const colors = ['#31d8b7', '#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff922b', '#cc5de8', '#20c997'];
+  state.ballColor = colors[Math.floor(Math.random() * colors.length)];
+  updateBallColor();
+  log('STATE', `小球颜色切换为: ${state.ballColor} — 测试 ColorMotion 颜色跟踪`);
+  incEvent();
+});
+
+document.getElementById('btnBallSize').addEventListener('click', () => {
+  state.ballSize = 20 + Math.floor(Math.random() * 60);
+  updateBallSize();
+  log('EVENT', `小球大小随机化为: ${state.ballSize}px — 测试多尺度模板匹配`);
+  incEvent();
+});
+
+document.getElementById('speedSlider').addEventListener('input', function() {
+  state.ballSpeedMultiplier = parseFloat(this.value);
+  document.getElementById('speedLabel').textContent = this.value + 'x';
+});
+
+// Initialize ball
+updateBallSize();
+updateBallColor();
+requestAnimationFrame(animateBall);
+log('STATE', '🏀 小球追踪模块已启动 — 模拟不规则运动目标，测试 ClickElement 点击移动目标、ColorMotion 运动检测');
+
+// ==================== PANEL 2: IMAGE APPEAR/DISAPPEAR ====================
+const targetImage = document.getElementById('targetImage');
+const imageShapes = [
+  { bg: '#4285f4', emoji: '🎯', label: '圆形靶标' },
+  { bg: '#ea4335', emoji: '⭐', label: '红色星形' },
+  { bg: '#34a853', emoji: '✅', label: '绿色勾号' },
+  { bg: '#fbbc04', emoji: '⚠️', label: '黄色警告' },
+  { bg: '#9c27b0', emoji: '💎', label: '紫色钻石' },
+  { bg: '#00bcd4', emoji: '🔵', label: '青色圆形' },
+];
+
+function updateImageShape() {
+  const shape = imageShapes[state.imageShape];
+  targetImage.style.background = shape.bg;
+  targetImage.textContent = shape.emoji;
+}
+
+function setImageVisible(v) {
+  if (v === state.imageVisible) return;
+  state.imageVisible = v;
+  targetImage.style.opacity = v ? '1' : '0';
+  if (v) {
+    state.imageAppearCount++;
+    document.getElementById('imageAppearCount').textContent = state.imageAppearCount;
+    document.getElementById('imageState').innerHTML = '🟢 可见 <span class="visible">(可见)</span>';
+    log('STATE', `🟢 目标图片出现 (第${state.imageAppearCount}次) — 应触发 WaitCondition ImageAppear`);
+  } else {
+    state.imageDisappearCount++;
+    document.getElementById('imageDisappearCount').textContent = state.imageDisappearCount;
+    document.getElementById('imageState').innerHTML = '🔴 隐藏 <span class="hidden">(隐藏)</span>';
+    log('STATE', `🔴 目标图片消失 (第${state.imageDisappearCount}次) — 应触发 WaitCondition ImageDisappear`);
+  }
+  incEvent();
+}
+
+document.getElementById('btnImageToggle').addEventListener('click', function() {
+  setImageVisible(!state.imageVisible);
+  this.classList.toggle('active', state.imageVisible);
+});
+
+document.getElementById('btnImageRandom').addEventListener('click', () => {
+  const delay = 500 + Math.random() * 3000;
+  log('EVENT', `🎲 随机显隐模式启动 — 将在 ${(delay/1000).toFixed(1)}s 后随机切换`);
+  // Random toggles with random intervals
+  let count = 0;
+  const maxToggles = 3 + Math.floor(Math.random() * 5);
+  function doToggle() {
+    if (count >= maxToggles) return;
+    setImageVisible(!state.imageVisible);
+    document.getElementById('btnImageToggle').classList.toggle('active', state.imageVisible);
+    count++;
+    if (count < maxToggles) {
+      const nextDelay = 500 + Math.random() * 3000;
+      setTimeout(doToggle, nextDelay);
+    }
+  }
+  setTimeout(doToggle, delay);
+  incEvent();
+});
+
+document.getElementById('btnImageShape').addEventListener('click', () => {
+  state.imageShape = (state.imageShape + 1) % imageShapes.length;
+  updateImageShape();
+  log('STATE', `目标图形切换为: ${imageShapes[state.imageShape].label} — 测试不同模板图像的匹配`);
+  incEvent();
+});
+
+document.getElementById('btnImagePosition').addEventListener('click', () => {
+  const area = document.getElementById('imageArea');
+  const maxX = area.clientWidth - 120;
+  const maxY = area.clientHeight - 120;
+  const x = Math.random() * maxX;
+  const y = Math.random() * maxY;
+  targetImage.style.position = 'absolute';
+  targetImage.style.left = x + 'px';
+  targetImage.style.top = y + 'px';
+  log('EVENT', `目标图片移动到随机位置 (${Math.round(x)}, ${Math.round(y)})`);
+  incEvent();
+});
+
+updateImageShape();
+log('STATE', '🖼️ 图片显隐模块已启动 — 测试 WaitCondition (ImageAppear/ImageDisappear)');
+
+// ==================== PANEL 3: OCR TEXT ====================
+const ocrTextEl = document.getElementById('ocrText');
+
+function updateOcrText() {
+  const txt = state.ocrTexts[state.ocrIndex];
+  ocrTextEl.textContent = txt;
+  document.getElementById('currentOcrText').textContent = txt;
+}
+
+document.getElementById('btnOcrRandom').addEventListener('click', () => {
+  state.ocrIndex = Math.floor(Math.random() * state.ocrTexts.length);
+  updateOcrText();
+  state.ocrChangeCount = parseInt(document.getElementById('ocrChangeCount').textContent) + 1;
+  document.getElementById('ocrChangeCount').textContent = state.ocrChangeCount;
+  log('EVENT', `OCR文本随机更换为: "${state.ocrTexts[state.ocrIndex]}" — 测试 OCRContain 文本检测`);
+  incEvent();
+});
+
+document.getElementById('btnOcrColor').addEventListener('click', () => {
+  const colors = ['#fff', '#ff6b6b', '#31d8b7', '#ffd93d', '#4d96ff', '#cc5de8', '#ff922b'];
+  const c = colors[Math.floor(Math.random() * colors.length)];
+  ocrTextEl.style.color = c;
+  log('EVENT', `文本颜色切换为: ${c} — 测试不同颜色下的 OCR 识别鲁棒性`);
+  incEvent();
+});
+
+document.getElementById('btnOcrSize').addEventListener('click', () => {
+  const sizes = ['16px', '24px', '32px', '40px', '48px', '56px', '64px'];
+  const s = sizes[Math.floor(Math.random() * sizes.length)];
+  ocrTextEl.style.fontSize = s;
+  log('EVENT', `文本大小切换为: ${s} — 测试不同字号下的 OCR 识别`);
+  incEvent();
+});
+
+document.getElementById('btnOcrBlink').addEventListener('click', function() {
+  state.ocrBlinking = !state.ocrBlinking;
+  this.classList.toggle('active', state.ocrBlinking);
+  if (state.ocrBlinking) {
+    log('STATE', '💫 文本闪烁模式开启 — 测试 OCR 在动态变化场景下的检测时序');
+    doBlink();
+  } else {
+    ocrTextEl.style.opacity = '1';
+    log('STATE', '文本闪烁模式关闭');
+  }
+  incEvent();
+});
+
+let blinkTimer = null;
+function doBlink() {
+  if (!state.ocrBlinking) return;
+  ocrTextEl.style.opacity = ocrTextEl.style.opacity === '1' ? '0.15' : '1';
+  blinkTimer = setTimeout(doBlink, 400 + Math.random() * 600);
+}
+
+log('STATE', '📝 文本识别模块已启动 — 测试 OCRContain 条件检测');
+
+// ==================== PANEL 4: COLOR DETECTION ====================
+document.getElementById('btnColorShuffle').addEventListener('click', () => {
+  const area = document.getElementById('colorArea');
+  const dots = area.querySelectorAll('.color-dot');
+  const positions = [];
+  dots.forEach(() => {
+    positions.push({
+      x: 20 + Math.random() * (area.clientWidth - 80),
+      y: 20 + Math.random() * (area.clientHeight - 80)
+    });
+  });
+  dots.forEach((dot, i) => {
+    dot.style.position = 'absolute';
+    dot.style.left = positions[i].x + 'px';
+    dot.style.top = positions[i].y + 'px';
+  });
+  log('EVENT', '🔀 颜色点随机洗牌 — 测试 ColorCal 多目标位置识别');
+  incEvent();
+});
+
+document.getElementById('btnColorRandom').addEventListener('click', () => {
+  const dots = document.querySelectorAll('#colorArea .color-dot');
+  const idx = Math.floor(Math.random() * dots.length);
+  const r = Math.floor(Math.random() * 256);
+  const g = Math.floor(Math.random() * 256);
+  const b = Math.floor(Math.random() * 256);
+  const color = `rgb(${r},${g},${b})`;
+  dots[idx].style.background = color;
+  dots[idx].dataset.color = color;
+  log('EVENT', `颜色点 #${idx+1} 变为 ${color} — 测试 ColorCal 颜色变化检测`);
+  incEvent();
+});
+
+document.getElementById('btnColorBlink').addEventListener('click', () => {
+  const dots = document.querySelectorAll('#colorArea .color-dot');
+  const idx = Math.floor(Math.random() * dots.length);
+  const origColor = dots[idx].style.background || dots[idx].dataset.color;
+  let blinks = 0;
+  const maxBlinks = 3 + Math.floor(Math.random() * 4);
+  log('EVENT', `✨ 颜色点 #${idx+1} 开始闪烁 (最多${maxBlinks}次) — 测试 StateChange 检测`);
+
+  function blinkOnce() {
+    if (blinks >= maxBlinks) {
+      dots[idx].style.background = origColor;
+      dots[idx].style.opacity = '1';
+      return;
+    }
+    dots[idx].style.opacity = dots[idx].style.opacity === '1' ? '0.2' : '1';
+    if (dots[idx].style.opacity === '1') blinks++;
+    setTimeout(blinkOnce, 200 + Math.random() * 300);
+  }
+  blinkOnce();
+  incEvent();
+});
+
+log('STATE', '🎨 颜色检测模块已启动 — 测试 ColorCal 多目标颜色识别与表达式计算');
+
+// ==================== PANEL 5: DIRECTION DETECTION ====================
+const directionArrow = document.getElementById('directionArrow');
+const directions = {
+  'Up':    { emoji: '⬆️', text: '上' },
+  'Down':  { emoji: '⬇️', text: '下' },
+  'Left':  { emoji: '⬅️', text: '左' },
+  'Right': { emoji: '➡️', text: '右' },
+  'Stationary': { emoji: '⏺️', text: '静止' },
+};
+
+function setDirection(dir) {
+  if (state.direction === dir) return;
+  state.direction = dir;
+  directionArrow.textContent = directions[dir].emoji;
+  document.getElementById('currentDirection').textContent = directions[dir].text;
+
+  const count = parseInt(document.getElementById('directionChangeCount').textContent) + 1;
+  document.getElementById('directionChangeCount').textContent = count;
+
+  log('STATE', `🧭 方向切换为: ${directions[dir].text} (${directions[dir].emoji}) — 测试 ColorMotion DirectionDetect`);
+  incEvent();
+}
+
+document.getElementById('btnDirRandom').addEventListener('click', () => {
+  const keys = Object.keys(directions);
+  const dir = keys[Math.floor(Math.random() * keys.length)];
+  setDirection(dir);
+});
+
+document.getElementById('btnDirCycle').addEventListener('click', function() {
+  state.directionCycle = !state.directionCycle;
+  this.classList.toggle('active', state.directionCycle);
+  log('STATE', state.directionCycle ? '🔄 自动方向循环开启' : '自动方向循环关闭');
+  incEvent();
+});
+
+document.getElementById('btnDirSpeed').addEventListener('click', () => {
+  const speeds = [500, 1000, 2000, 3000, 5000];
+  state.directionSpeed = speeds[Math.floor(Math.random() * speeds.length)];
+  log('EVENT', `方向切换速度变为: ${state.directionSpeed}ms`);
+  incEvent();
+});
+
+// Auto cycle directions
+const dirOrder = ['Up', 'Right', 'Down', 'Left', 'Stationary'];
+let dirIdx = 0;
+let dirCycleTimer = null;
+
+function runDirectionCycle() {
+  if (!state.directionCycle) {
+    dirCycleTimer = setTimeout(runDirectionCycle, 500);
+    return;
+  }
+  setDirection(dirOrder[dirIdx % dirOrder.length]);
+  dirIdx++;
+  dirCycleTimer = setTimeout(runDirectionCycle, state.directionSpeed);
+}
+runDirectionCycle();
+
+log('STATE', '🧭 方向检测模块已启动 — 测试 ColorMotion DirectionDetect (5方向输出)');
+
+// ==================== PANEL 6: UTILITY BUTTONS ====================
+document.getElementById('btnClearLog').addEventListener('click', () => {
+  logArea.innerHTML = '';
+  log('STATE', '日志已清空');
+});
+
+document.getElementById('btnExportState').addEventListener('click', () => {
+  const exportData = {
+    timestamp: new Date().toISOString(),
+    elapsedMs: Date.now() - state.startTime,
+    eventCount: state.eventCount,
+    ball: {
+      position: getBallCenter(),
+      velocity: { vx: state.ballVX.toFixed(2), vy: state.ballVY.toFixed(2) },
+      size: state.ballSize,
+      color: state.ballColor,
+      running: state.ballRunning,
+    },
+    image: {
+      visible: state.imageVisible,
+      appearCount: state.imageAppearCount,
+      disappearCount: state.imageDisappearCount,
+      shape: imageShapes[state.imageShape].label,
+    },
+    ocr: {
+      currentText: state.ocrTexts[state.ocrIndex],
+      blinking: state.ocrBlinking,
+    },
+    direction: {
+      current: state.direction,
+      cycling: state.directionCycle,
+      speed: state.directionSpeed,
+    },
+  };
+  log('STATE', '📥 当前状态已导出到控制台 (F12 查看)');
+  console.log('=== FlowAuto Test Suite State Export ===', JSON.stringify(exportData, null, 2));
+  incEvent();
+});
+
+// ==================== GLOBAL KEYBOARD SHORTCUTS ====================
+document.addEventListener('keydown', (e) => {
+  switch(e.key.toLowerCase()) {
+    case ' ':
+      e.preventDefault();
+      document.getElementById('btnBallToggle').click();
+      break;
+    case 'i':
+      if (!e.ctrlKey) { e.preventDefault(); document.getElementById('btnImageToggle').click(); }
+      break;
+    case 'r':
+      if (!e.ctrlKey) { e.preventDefault(); document.getElementById('btnBallSpeed').click(); }
+      break;
+    case 't':
+      if (!e.ctrlKey) { e.preventDefault(); document.getElementById('btnOcrRandom').click(); }
+      break;
+    case 'd':
+      if (!e.ctrlKey) { e.preventDefault(); document.getElementById('btnDirRandom').click(); }
+      break;
+    case 'c':
+      if (!e.ctrlKey) { e.preventDefault(); document.getElementById('btnColorShuffle').click(); }
+      break;
+  }
+});
+
+// ==================== INITIALIZATION ====================
+log('STATE', '═══════════════════════════════════════');
+log('STATE', '🧪 FlowAuto 测试套件初始化完成');
+log('STATE', '═══════════════════════════════════════');
+log('STATE', '');
+log('STATE', '📋 测试场景覆盖:');
+log('STATE', '  1. 小球追踪 → ClickElement (动态坐标点击) / ColorMotion MotionDetect');
+log('STATE', '  2. 图片显隐 → WaitCondition (ImageAppear / ImageDisappear)');
+log('STATE', '  3. 文本识别 → WaitCondition OCRContain / ClickElement OCR');
+log('STATE', '  4. 颜色检测 → ColorCal (多目标颜色识别与表达式)');
+log('STATE', '  5. 方向检测 → ColorMotion DirectionDetect (5方向输出)');
+log('STATE', '');
+log('STATE', '⌨️ 快捷键: [Space]暂停小球 [I]切换图片 [R]随机小球速度 [T]随机文本 [D]随机方向 [C]洗牌颜色');
+log('STATE', '💡 提示: 打开浏览器开发者工具(F12)控制台可查看导出状态');
+log('STATE', '');
+log('STATE', '✅ 测试套件就绪 — 可配合 FlowAuto 进行自动化测试验证');
+</script>
+</body>
+</html>
