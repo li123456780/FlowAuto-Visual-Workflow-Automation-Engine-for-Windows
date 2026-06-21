@@ -121,11 +121,13 @@ public class FlowExecutor
             }
             else if (node.NodeType == NodeType.ColorMotion)
             {
-                // DirectionDetect mode uses direction-named ports
+                // DirectionDetect mode executes its branch keys internally in ExecuteColorMotionAsync;
+                // skip the outgoing connection traversal to avoid double-execution.
                 var mode = node.GetParam<string>("MotionMode") ?? "MotionDetect";
                 if (mode == "DirectionDetect")
                 {
-                    activePort = _context.Get<string>($"{node.NodeId}_direction");
+                    // Direction branches already executed internally — nothing to follow here.
+                    return;
                 }
             }
 
@@ -840,6 +842,13 @@ public class FlowExecutor
             _context.CheckCancellation();
             await _context.WaitIfPausedAsync();
 
+            // ── FixedCount: check BEFORE executing to avoid off-by-one edge cases ──
+            if (loopMode == "FixedCount" && loopCount > 0 && iteration >= loopCount)
+            {
+                _context.Logger.Success(loopStart.NodeName, $"Loop completed ({iteration}/{loopCount} iterations)");
+                break;
+            }
+
             // Reset break condition flag each iteration
             _context.Set($"{loopStart.NodeId}_breakCond", false);
 
@@ -871,13 +880,6 @@ public class FlowExecutor
             {
                 breakRequested = true;
                 _context.Logger.Info(loopStart.NodeName, $"BreakCondition met, exiting loop after {iteration} iteration(s)");
-                break;
-            }
-
-            // FixedCount check
-            if (loopMode == "FixedCount" && loopCount > 0 && iteration >= loopCount)
-            {
-                _context.Logger.Success(loopStart.NodeName, $"Loop completed ({iteration}/{loopCount} iterations)");
                 break;
             }
         }
@@ -1005,10 +1007,10 @@ public class FlowExecutor
         else if (node.NodeType == NodeType.ColorMotion)
         {
             var mm = node.GetParam<string>("MotionMode") ?? "MotionDetect";
+            // DirectionDetect mode executes its branch keys internally — skip connection traversal
             if (mm == "DirectionDetect")
-                bodyActivePort = _context.Get<string>($"{node.NodeId}_direction");
-            else
-                bodyActivePort = _context.Get<string>($"{node.NodeId}_result") ?? "True";
+                return;
+            bodyActivePort = _context.Get<string>($"{node.NodeId}_result") ?? "True";
         }
 
         if (!outgoingMap.TryGetValue(node.NodeId, out var succs)) return;
