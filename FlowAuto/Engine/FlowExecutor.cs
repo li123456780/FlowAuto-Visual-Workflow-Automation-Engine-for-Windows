@@ -121,13 +121,15 @@ public class FlowExecutor
             }
             else if (node.NodeType == NodeType.ColorMotion)
             {
-                // DirectionDetect mode executes its branch keys internally in ExecuteColorMotionAsync;
-                // skip the outgoing connection traversal to avoid double-execution.
+                // DirectionDetect mode uses direction-named ports
                 var mode = node.GetParam<string>("MotionMode") ?? "MotionDetect";
                 if (mode == "DirectionDetect")
                 {
-                    // Direction branches already executed internally — nothing to follow here.
-                    return;
+                    activePort = _context.Get<string>($"{node.NodeId}_direction");
+                }
+                else
+                {
+                    activePort = _context.Get<string>($"{node.NodeId}_result") ?? "True";
                 }
             }
 
@@ -1007,10 +1009,10 @@ public class FlowExecutor
         else if (node.NodeType == NodeType.ColorMotion)
         {
             var mm = node.GetParam<string>("MotionMode") ?? "MotionDetect";
-            // DirectionDetect mode executes its branch keys internally — skip connection traversal
             if (mm == "DirectionDetect")
-                return;
-            bodyActivePort = _context.Get<string>($"{node.NodeId}_result") ?? "True";
+                bodyActivePort = _context.Get<string>($"{node.NodeId}_direction");
+            else
+                bodyActivePort = _context.Get<string>($"{node.NodeId}_result") ?? "True";
         }
 
         if (!outgoingMap.TryGetValue(node.NodeId, out var succs)) return;
@@ -1430,16 +1432,8 @@ public class FlowExecutor
             _context.Set($"{node.NodeId}_direction", detectedDirection);
 
             _context.Logger.Info(node.NodeName, $"DirectionDetect result: {detectedDirection}");
-
-            var dirBranches = node.DirectionBranches;
-            if (dirBranches != null && dirBranches.TryGetValue(detectedDirection, out var branch) && branch.Count > 0)
-            {
-                await ExecuteNodeListAsync(branch);
-            }
-            else if (dirBranches != null && dirBranches.TryGetValue("Stationary", out var stationaryBranch) && stationaryBranch.Count > 0)
-            {
-                await ExecuteNodeListAsync(stationaryBranch);
-            }
+            // Direction branch routing is now handled by connection traversal (activePort filtering)
+            // — no internal ExecuteNodeListAsync to avoid double-execution with connected nodes.
         }
         else if (motionMode == "ColorDetect")
         {
