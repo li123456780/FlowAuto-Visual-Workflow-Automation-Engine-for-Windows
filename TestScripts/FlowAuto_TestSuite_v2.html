@@ -355,6 +355,7 @@ let barX=50,barVX=3,barW=80,barRunning=true;
 let barCorrect=0,barWrong=0,barDir='Stationary',barKeyPressed='-';
 const barNoiseDots=[],barNoiseRects=[];
 const barHistory=[];
+let barDirTimer=0,barDirInterval=40;
 
 function generateBarNoise(){
   barNoiseDots.forEach(d=>d.remove());barNoiseDots.length=0;
@@ -421,13 +422,23 @@ function validateBarKeyPress(key){
 function animBar(){
   if(!barRunning){requestAnimationFrame(animBar);return;}
   const aw = barArea.clientWidth;
-  barVX += (Math.random() - 0.5) * 0.3;
-  const spd = Math.abs(barVX);
-  if(spd > 8) barVX = (barVX / spd) * 8;
-  if(spd < 1.2) barVX = (Math.random() > 0.5 ? 3 : -3);
+  // Randomly change direction every ~30-70 frames (0.5~1.2s at 60fps)
+  barDirTimer++;
+  if(barDirTimer >= barDirInterval){
+    barDirTimer = 0;
+    barDirInterval = 30 + Math.floor(Math.random() * 50);
+    // Randomly pick: go left, go right, or pause briefly
+    const r = Math.random();
+    if(r < 0.45) barVX = 2 + Math.random() * 4;        // move right
+    else if(r < 0.85) barVX = -(2 + Math.random() * 4); // move left
+    else barVX = 0;                                      // brief pause
+  }
+  // Wall clamping — just stop and wait for next direction change
+  if(barX <= 0){ barX = 0; barVX = 0; }
+  if(barX >= aw - barW){ barX = aw - barW; barVX = 0; }
   barX += barVX;
-  if(barX <= 0){ barX = 0; barVX = Math.abs(barVX) * (0.7 + Math.random() * 0.5); }
-  if(barX >= aw - barW){ barX = aw - barW; barVX = -Math.abs(barVX) * (0.7 + Math.random() * 0.5); }
+  // Smooth speed decay (avoid instant stops looking unnatural)
+  if(barVX === 0 && Math.random() < 0.3) barDirTimer = barDirInterval; // force early direction change
   bar.style.left = barX + 'px';
   recordPosition(barHistory, barX + barW/2, 0);
   requestAnimationFrame(animBar);
