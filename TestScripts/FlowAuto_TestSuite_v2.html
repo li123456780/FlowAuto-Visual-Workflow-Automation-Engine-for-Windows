@@ -431,9 +431,9 @@ function animBar(){
     if(Math.random() < 0.5) barVX = 2 + Math.random() * 4;        // move right
     else                    barVX = -(2 + Math.random() * 4);      // move left
   }
-  // Wall clamping — just stop and wait for next direction change
-  if(barX <= 0){ barX = 0; barVX = 0; }
-  if(barX >= aw - barW){ barX = aw - barW; barVX = 0; }
+  // Wall clamping — immediately reverse direction away from wall
+  if(barX <= 0){ barX = 0; barVX = 2 + Math.random() * 4; barDirTimer = 0; }
+  else if(barX >= aw - barW){ barX = aw - barW; barVX = -(2 + Math.random() * 4); barDirTimer = 0; }
   barX += barVX;
   bar.style.left = barX + 'px';
   recordPosition(barHistory, barX + barW/2, 0);
