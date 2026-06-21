@@ -1,7 +1,7 @@
 {
   "FlowName": "test_click_element.flow",
   "Version": "1.0",
-  "CreatedAt": "2026-06-18",
+  "CreatedAt": "2026-06-21",
   "Nodes": [
     {
       "NodeId": "n_start",
@@ -12,7 +12,7 @@
       "RetryCount": 1,
       "Parameters": {
         "FilePath": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
-        "Arguments": "file:///d:/AutoScript/FlowAuto/TestScripts/FlowAuto_TestSuite_v2.html",
+        "Arguments": "file:///e:/AutoScript/FlowAuto/TestScripts/FlowAuto_TestSuite_v2.html",
         "WindowTitleKeyword": "FlowAuto v2",
         "WaitForWindowMs": 5000,
         "WorkingDirectory": "",

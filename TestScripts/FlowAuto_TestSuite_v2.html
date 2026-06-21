@@ -213,7 +213,7 @@ setInterval(()=>{
 
 // ==================== PANEL 1: BALL CLICK ====================
 const ballArea=$('ballArea'), ball=$('ball');
-let bX=100,bY=70,bVX=2.2,bVY=1.6,bR=17,bRunning=true,bColor='#31d8b7';
+let bX=100,bY=70,bVX=1.2,bVY=0.9,bR=17,bRunning=true,bColor='#31d8b7';
 let clickTotal=0,clickHit=0,clickMiss=0;
 
 function updateBallStyle(){
@@ -247,8 +247,8 @@ ballArea.addEventListener('click',e=>{
 function animBall(){
   if(!bRunning){requestAnimationFrame(animBall);return;}
   const aw=ballArea.clientWidth,ah=ballArea.clientHeight;
-  bVX+=(Math.random()-0.5)*0.25;bVY+=(Math.random()-0.5)*0.25;
-  const spd=Math.sqrt(bVX**2+bVY**2);if(spd>7){bVX=bVX/spd*7;bVY=bVY/spd*7;}if(spd<0.4){bVX=(Math.random()-0.5)*3;bVY=(Math.random()-0.5)*3;}
+  bVX+=(Math.random()-0.5)*0.15;bVY+=(Math.random()-0.5)*0.15;
+  const spd=Math.sqrt(bVX**2+bVY**2);if(spd>4){bVX=bVX/spd*4;bVY=bVY/spd*4;}if(spd<0.4){bVX=(Math.random()-0.5)*2;bVY=(Math.random()-0.5)*2;}
   bX+=bVX;bY+=bVY;
   if(bX<=0){bX=0;bVX=Math.abs(bVX)*(0.7+Math.random()*0.5);}
   if(bX>=aw-bR*2){bX=aw-bR*2;bVX=-Math.abs(bVX)*(0.7+Math.random()*0.5);}
@@ -260,7 +260,7 @@ function animBall(){
 }
 
 $('btnBallToggle').addEventListener('click',function(){bRunning=!bRunning;this.textContent=bRunning?'⏯️ 暂停':'▶️ 恢复';this.classList.toggle('active',bRunning);log('b',bRunning?'小球运动恢复':'小球暂停');evt();});
-$('btnBallSpeed').addEventListener('click',()=>{bVX=(Math.random()-0.5)*8;bVY=(Math.random()-0.5)*8;log('b',`小球速度随机化 VX=${bVX.toFixed(2)} VY=${bVY.toFixed(2)}`);evt();});
+$('btnBallSpeed').addEventListener('click',()=>{bVX=(Math.random()-0.5)*5;bVY=(Math.random()-0.5)*5;log('b',`小球速度随机化 VX=${bVX.toFixed(2)} VY=${bVY.toFixed(2)}`);evt();});
 $('btnBallColor').addEventListener('click',()=>{const cs=['#31d8b7','#ff6b6b','#ffd93d','#6bcb77','#4d96ff'];bColor=cs[Math.floor(Math.random()*cs.length)];updateBallStyle();log('b',`小球颜色切换为 ${bColor}`);evt();});
 $('btnResetClick').addEventListener('click',()=>{clickTotal=clickHit=clickMiss=0;updateClickStats();log('b','🔄 点击统计已重置');evt();});
 
