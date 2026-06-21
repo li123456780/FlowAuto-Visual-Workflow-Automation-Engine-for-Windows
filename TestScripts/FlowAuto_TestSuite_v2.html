@@ -427,18 +427,14 @@ function animBar(){
   if(barDirTimer >= barDirInterval){
     barDirTimer = 0;
     barDirInterval = 30 + Math.floor(Math.random() * 50);
-    // Randomly pick: go left, go right, or pause briefly
-    const r = Math.random();
-    if(r < 0.45) barVX = 2 + Math.random() * 4;        // move right
-    else if(r < 0.85) barVX = -(2 + Math.random() * 4); // move left
-    else barVX = 0;                                      // brief pause
+    // Randomly pick: go left or go right (never stop)
+    if(Math.random() < 0.5) barVX = 2 + Math.random() * 4;        // move right
+    else                    barVX = -(2 + Math.random() * 4);      // move left
   }
   // Wall clamping — just stop and wait for next direction change
   if(barX <= 0){ barX = 0; barVX = 0; }
   if(barX >= aw - barW){ barX = aw - barW; barVX = 0; }
   barX += barVX;
-  // Smooth speed decay (avoid instant stops looking unnatural)
-  if(barVX === 0 && Math.random() < 0.3) barDirTimer = barDirInterval; // force early direction change
   bar.style.left = barX + 'px';
   recordPosition(barHistory, barX + barW/2, 0);
   requestAnimationFrame(animBar);
