@@ -1,7 +1,7 @@
 {
   "FlowName": "test_colormotion_hsv.flow",
   "Version": "1.0",
-  "CreatedAt": "2026-06-19",
+  "CreatedAt": "2026-06-21",
   "Nodes": [
     {
       "NodeId": "n_colormotion_right",
@@ -22,10 +22,10 @@
         "MoveDurationMs": 10000,
         "UseFullScreen": false,
         "Region": {
-          "X": 657,
-          "Y": 484,
-          "Width": 608,
-          "Height": 181
+          "X": 1288,
+          "Y": 448,
+          "Width": 617,
+          "Height": 237
         },
         "TrackMode": "ColorTrack",
         "StateCheckIntervalMs": 100,
@@ -144,10 +144,10 @@
       "TimeoutMs": 30000,
       "RetryCount": 3,
       "Parameters": {
-        "LoopCount": 40,
+        "LoopCount": 20,
         "LoopMode": "FixedCount"
       },
-      "CanvasX": 309,
+      "CanvasX": 308,
       "CanvasY": 162,
       "Children": []
     },
@@ -198,7 +198,7 @@
         "TargetWindow": "FlowAuto v2"
       },
       "CanvasX": 192,
-      "CanvasY": 533,
+      "CanvasY": 534,
       "Children": []
     },
     {
@@ -216,7 +216,7 @@
         "TargetWindow": "FlowAuto v2"
       },
       "CanvasX": 431,
-      "CanvasY": 534,
+      "CanvasY": 539,
       "Children": []
     }
   ],
